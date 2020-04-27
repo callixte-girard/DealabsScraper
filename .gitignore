@@ -6,12 +6,11 @@
 # private and voluminous files
 data_*
 # test files (can be voluminous)
-test
+#test
 # macOS-specific
 .DS_Store
 # maven specific
 target
-
 # python-specific
 **__pycache__*
 venv
