@@ -15,10 +15,19 @@ public class Debug {
 //            else if (obj.getClass().toString().contains("[]")) dList((Object[]) obj);
             else {
                 String objStr = String.valueOf(obj);
-                System.out.println(objStr);
+                out += objStr + " ";
+//                System.out.println(objStr);
             }
         }
+        System.out.println(out);
         return out;
+    }
+
+    public static void dL(Object... objs) {
+        for (Object obj : objs) {
+            d(obj);
+            d(l);
+        }
     }
 
     private static void dList(List list) {

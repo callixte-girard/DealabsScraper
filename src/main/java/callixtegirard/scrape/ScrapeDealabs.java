@@ -5,6 +5,8 @@ import static callixtegirard.util.Debug.*;
 import okhttp3.HttpUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.IOException;
@@ -21,21 +23,42 @@ public class ScrapeDealabs
         try {
 //            ChromeDriver browser = new ChromeDriver();
 
-            for (int i=0 ; i<urlsSections.length ; i++)
+//            for (int sectionIndex=0 ; sectionIndex<urlsSections.length ; sectionIndex++)
+            int sectionIndex = 0;
+
+            int pageIndex = 0;
+            boolean finished = false;
+            while (!finished)
             {
+                pageIndex ++;
+
 //                URL url = HttpUrl.parse("http://example.com:4567/foldername/1234?abc=xyz").url(); // to parse
                 HttpUrl url = new HttpUrl.Builder()
                         .scheme("https")
                         .host("dealabs.com")
                         .addPathSegment("hot")
-                        .addQueryParameter("page", "1")
+                        .addQueryParameter("page", String.valueOf(pageIndex))
                         .build();
                 d(url);
 
-
-                String urlSection = urlRoot + urlsSections[i];
+                String urlSection = urlRoot + urlsSections[sectionIndex];
                 Document doc = Jsoup.connect(urlSection).get();
-                d(doc);
+//                d(doc);
+
+                Elements articles = doc.getElementsByTag("article");
+                for (Element article : articles)
+                {
+//                    d(article);
+//                    Elements articleSections = article.getElementsByAttributeValueStarting("class", "threadGrid");
+                    Element articleImage = article.getElementsByAttributeValueStarting("class", "threadGrid-image").first();
+                    Element articleHeader = article.getElementsByAttributeValueStarting("class", "threadGrid-headerMeta").first();
+                    Element articleTitle = article.getElementsByAttributeValueStarting("class", "threadGrid-title").first();
+                    Element articleBody = article.getElementsByAttributeValueStarting("class", "threadGrid-body").first();
+                    Element articleFooter = article.getElementsByAttributeValueStarting("class", "threadGrid-footerMeta").first();
+                    dL(articleImage, articleHeader, articleTitle, articleBody, articleFooter);
+                }
+                d("page n°", pageIndex, "contains", articles.size(), "articles");
+                d(s);
             }
 
         } catch (IOException exc) {
