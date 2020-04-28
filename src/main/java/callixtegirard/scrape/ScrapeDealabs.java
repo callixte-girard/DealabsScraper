@@ -2,6 +2,10 @@ package callixtegirard.scrape;
 
 import static callixtegirard.util.Debug.*;
 
+import callixtegirard.model.Deal;
+import callixtegirard.reference.model.Attribute;
+import callixtegirard.reference.model.AttributeStatus;
+import callixtegirard.reference.model.ExpiringAttribute;
 import okhttp3.HttpUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,6 +44,8 @@ public class ScrapeDealabs
                 Document doc = Jsoup.connect(url.toString()).get();
 //                d(doc);
 
+                Deal deal = new Deal(url);
+
                 Elements articles = doc.getElementsByTag("article");
                 for (Element article : articles)
                 {
@@ -53,15 +59,17 @@ public class ScrapeDealabs
 //                    dL(articleImage, articleHeader, articleTitle, articleBody, articleFooter);
 
                     // 1) image
-                    String imageURL = articleImage.getElementsByTag("a").first().attr("href"); // not the image url !
-                    d(imageURL);
+//                    String imageURL = articleImage.getElementsByTag("a").first().attr("href"); // not the image url !
+//                    d(imageURL);
 
                     // 2)a) temperature & deal status
                     Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
                     boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
                     String temperatureRaw = temperatureBox.text().trim();
-                    int temperature = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
-                    d(dealExpired, temperature);
+                    int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
+//                    d(dealExpired, temperatureValue);
+                    Attribute temperature = new ExpiringAttribute(dealExpired, temperatureValue);
+                    deal.setTemperature(temperature);
 
                     // 2)b) expiration date, place and publication date
 

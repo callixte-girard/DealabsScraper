@@ -3,16 +3,9 @@ package callixtegirard;
 
 import callixtegirard.reference.model.Attribute;
 import callixtegirard.reference.model.AttributeStatus;
-import okhttp3.HttpUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import static callixtegirard.util.Debug.d;
 import static callixtegirard.util.Debug.dL;
@@ -23,9 +16,9 @@ public class Test
     public static void main(String[] args) throws Exception
     {
         Attribute[] attrs = {
-                new Attribute("pipou", AttributeStatus.PRESENT, 35),
-                new Attribute("pipou", AttributeStatus.ABSENT, null),
-                new Attribute("pipou", AttributeStatus.EXPIRED, 76),
+                new Attribute("pipou", AttributeStatus.AVAILABLE, 35),
+                new Attribute("pipou", AttributeStatus.INEXISTANT, null),
+                new Attribute("pipou", AttributeStatus.UNAVAILABLE, 76),
         };
         dL(attrs);
 
