@@ -55,7 +55,16 @@ public class ScrapeDealabs
                     Element articleTitle = article.getElementsByAttributeValueStarting("class", "threadGrid-title").first();
                     Element articleBody = article.getElementsByAttributeValueStarting("class", "threadGrid-body").first();
                     Element articleFooter = article.getElementsByAttributeValueStarting("class", "threadGrid-footerMeta").first();
-                    dL(articleImage, articleHeader, articleTitle, articleBody, articleFooter);
+//                    dL(articleImage, articleHeader, articleTitle, articleBody, articleFooter);
+
+                    // 1) image
+                    String imageURL = articleImage.getElementsByTag("a").first().attr("href"); // not the image url !
+
+                    // 2) temperature & deal status
+                    Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
+                    boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
+                    String temperatureRaw = temperatureBox.text().trim(); // TODO fix the fact that "Expired" appears too
+                    d(imageURL, dealExpired, temperatureRaw);
                 }
                 d("page n°", pageIndex, "contains", articles.size(), "articles");
                 d(s);
