@@ -23,9 +23,6 @@ public class ScrapeDealabs
         try {
 //            ChromeDriver browser = new ChromeDriver();
 
-//            for (int sectionIndex=0 ; sectionIndex<urlsSections.length ; sectionIndex++)
-            int sectionIndex = 0;
-
             int pageIndex = 0;
             boolean finished = false;
             while (!finished)
@@ -40,9 +37,7 @@ public class ScrapeDealabs
                         .addQueryParameter("page", String.valueOf(pageIndex))
                         .build();
                 d(url);
-
-                String urlSection = urlRoot + urlsSections[sectionIndex];
-                Document doc = Jsoup.connect(urlSection).get();
+                Document doc = Jsoup.connect(url.toString()).get();
 //                d(doc);
 
                 Elements articles = doc.getElementsByTag("article");
@@ -59,12 +54,18 @@ public class ScrapeDealabs
 
                     // 1) image
                     String imageURL = articleImage.getElementsByTag("a").first().attr("href"); // not the image url !
+                    d(imageURL);
 
-                    // 2) temperature & deal status
+                    // 2)a) temperature & deal status
                     Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
                     boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
-                    String temperatureRaw = temperatureBox.text().trim(); // TODO fix the fact that "Expired" appears too
-                    d(imageURL, dealExpired, temperatureRaw);
+                    String temperatureRaw = temperatureBox.text().trim();
+                    int temperature = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
+                    d(dealExpired, temperature);
+
+                    // 2)b) expiration date, place and publication date
+
+                    d(l);
                 }
                 d("page n°", pageIndex, "contains", articles.size(), "articles");
                 d(s);

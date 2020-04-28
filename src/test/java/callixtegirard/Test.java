@@ -1,6 +1,8 @@
 package callixtegirard;
 
 
+import callixtegirard.reference.model.Attribute;
+import callixtegirard.reference.model.AttributeStatus;
 import okhttp3.HttpUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,23 +15,31 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import static callixtegirard.util.Debug.d;
+import static callixtegirard.util.Debug.dL;
 
 
 public class Test
 {
     public static void main(String[] args) throws Exception
     {
+        Attribute[] attrs = {
+                new Attribute("pipou", AttributeStatus.PRESENT, 35),
+                new Attribute("pipou", AttributeStatus.ABSENT, null),
+                new Attribute("pipou", AttributeStatus.EXPIRED, 76),
+        };
+        dL(attrs);
+
 //        Properties devProps = readPropertiesFile("devConfig.properties");
 //        Properties prodProps = readPropertiesFile("prodConfig.properties");
 
-        HttpUrl urlTest = new HttpUrl.Builder()
+        /*HttpUrl urlTest = new HttpUrl.Builder()
                 .scheme("https")
                 .host("dealabs.com")
                 .addPathSegment("hot")
                 .addQueryParameter("page", "1")
                 .build();
         d(urlTest);
-        testServerLimit(urlTest.toString(), "Smartphone 6.55\" OnePlus 8 - 8 Go RAM, 128 Go ROM - Onyx Black ou Glacial Green (+29.25€ en SuperPoints)");
+        testServerLimit(urlTest.toString(), "Smartphone 6.55\" OnePlus 8 - 8 Go RAM, 128 Go ROM - Onyx Black ou Glacial Green (+29.25€ en SuperPoints)");*/
 
         /*String testValueOfPrimitive = String.valueOf(3);
         String testValueOfExtended = String.valueOf(new ArrayList<>()); // yeah ! it works.
