@@ -1,8 +1,14 @@
 package callixtegirard.util;
 
+import org.w3c.dom.events.UIEvent;
+
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +19,14 @@ import static callixtegirard.util.Debug.d;
 
 public class ReadWriteFile
 {
+    // DOWNLOAD AND SAVE FILE
+    public static void writeFileFromURL(String url, String path) throws IOException
+    {
+        InputStream in = new URL(url).openStream();
+        Files.copy(in, Paths.get(path));
+    }
+
+
     // READ AND WRITE PROPERTIES
     public static Properties readProperties(String propFileName)
     {

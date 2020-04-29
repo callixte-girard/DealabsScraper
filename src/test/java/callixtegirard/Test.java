@@ -7,6 +7,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static callixtegirard.util.Debug.d;
 import static callixtegirard.util.Debug.dL;
 
@@ -15,12 +25,36 @@ public class Test
 {
     public static void main(String[] args) throws Exception
     {
-        Attribute[] attrs = {
+        String testOutputPath = "/Users/c/Desktop/test.jpg";
+
+//        String imageURL = "https://www.dealabs.com/visit/threadimage/1879504"; :/ fuck c'est pas une image en fait
+        String imageURL = "https://upload.wikimedia.org/wikipedia/commons/d/df/Fox_study_6.jpg";
+
+        try (InputStream in = new URL(imageURL).openStream()) {
+            Files.copy(in, Paths.get(testOutputPath));
+        }
+
+//        Image image = null;
+//        URL url = new URL(imageURL);
+//        image = ImageIO.read(url);
+//        FileOutputStream fos = new FileOutputStream(testOutputPath);
+//        fos.write();
+//        fos.close();
+
+
+
+
+        /*URI uri = new URI("https://www.dealabs.com/hot?page=1");
+        d(uri.getAuthority(), uri.getQuery(), uri.getPath(), uri.getPort());
+        URL url = uri.toURL();
+        d(url);*/
+
+        /*Attribute[] attrs = {
                 new Attribute("pipou", AttributeStatus.AVAILABLE, 35),
                 new Attribute("pipou", AttributeStatus.INEXISTANT, null),
                 new Attribute("pipou", AttributeStatus.UNAVAILABLE, 76),
         };
-        dL(attrs);
+        dL(attrs);*/
 
 //        Properties devProps = readPropertiesFile("devConfig.properties");
 //        Properties prodProps = readPropertiesFile("prodConfig.properties");

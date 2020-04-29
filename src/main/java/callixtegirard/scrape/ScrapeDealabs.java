@@ -7,6 +7,7 @@ import callixtegirard.reference.model.Attribute;
 import callixtegirard.reference.model.AttributeStatus;
 import callixtegirard.reference.model.ExpiringAttribute;
 import okhttp3.HttpUrl;
+import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,6 +15,9 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 
@@ -22,7 +26,7 @@ public class ScrapeDealabs
     private static final String urlRoot = "https://www.dealabs.com/";
     private static final String[] urlsSections = {"hot"};
 
-    public static void main( String[] args ) throws IOException
+    public static void main( String[] args ) throws IOException, URISyntaxException
     {
         try {
 //            ChromeDriver browser = new ChromeDriver();
@@ -33,54 +37,83 @@ public class ScrapeDealabs
             {
                 pageIndex ++;
 
-//                URL url = HttpUrl.parse("http://example.com:4567/foldername/1234?abc=xyz").url(); // to parse
-                HttpUrl url = new HttpUrl.Builder()
+                /*HttpUrl url = new HttpUrl.Builder()
                         .scheme("https")
                         .host("dealabs.com")
                         .addPathSegment("hot")
                         .addQueryParameter("page", String.valueOf(pageIndex))
-                        .build();
-                d(url);
+                        .build();*/
+                String scheme = "https";
+                String authority = "dealabs.com";
+                String path = "/hot";
+                String query = "page=" + pageIndex;
+                String fragment = null;
+                URI uri = new URI(scheme, authority, path, query, fragment);
+                URL url = uri.toURL();
+//                d(url);
+
                 Document doc = Jsoup.connect(url.toString()).get();
 //                d(doc);
 
-                Deal deal = new Deal(url);
-
-                Elements articles = doc.getElementsByTag("article");
-                for (Element article : articles)
+                Elements deals = doc.getElementsByTag("article");
+                for (Element deal : deals)
                 {
-//                    d(article);
-//                    Elements articleSections = article.getElementsByAttributeValueStarting("class", "threadGrid");
-                    Element articleImage = article.getElementsByAttributeValueStarting("class", "threadGrid-image").first();
-                    Element articleHeader = article.getElementsByAttributeValueStarting("class", "threadGrid-headerMeta").first();
-                    Element articleTitle = article.getElementsByAttributeValueStarting("class", "threadGrid-title").first();
-                    Element articleBody = article.getElementsByAttributeValueStarting("class", "threadGrid-body").first();
-                    Element articleFooter = article.getElementsByAttributeValueStarting("class", "threadGrid-footerMeta").first();
-//                    dL(articleImage, articleHeader, articleTitle, articleBody, articleFooter);
+                    // get deal detail url
+                    Element link = deal.getElementsByAttributeValueContaining("class", "linkPlain").first();
+                    String dealUrl = link.attr("href");
+//                    d(dealUrl);
 
-                    // 1) image
-//                    String imageURL = articleImage.getElementsByTag("a").first().attr("href"); // not the image url !
-//                    d(imageURL);
+                    // scrape infos in Preview View (not necesary here)
+//                    String dealName = link.text();
+//                    d(dealName);
 
-                    // 2)a) temperature & deal status
-                    Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
-                    boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
-                    String temperatureRaw = temperatureBox.text().trim();
-                    int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
-//                    d(dealExpired, temperatureValue);
-                    Attribute temperature = new ExpiringAttribute(dealExpired, temperatureValue);
-                    deal.setTemperature(temperature);
-
-                    // 2)b) expiration date, place and publication date
-
+                    // scrape infos in Detail View
+                    scrapeDeal(dealUrl);
                     d(l);
+
+                    // to test
+                    finished = true;
                 }
-                d("page n°", pageIndex, "contains", articles.size(), "articles");
+                d("page n°", pageIndex, "contains", deals.size(), "articles");
                 d(s);
             }
 
         } catch (IOException exc) {
             throw exc;
         }
+    }
+
+    private static void scrapeDeal(String urlString) throws MalformedURLException, IOException
+    {
+        URL url = new URL(urlString);
+//        d(url.getPath()); // bon à savoir !
+
+        Deal deal = new Deal(url);
+
+        Document doc = Jsoup.connect(urlString).get();
+
+        Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
+
+        Element articleHeader = threadItem.getElementsByAttributeValueStarting("class", "threadItem-headerMeta").first();
+        Element articleTitle = threadItem.getElementsByAttributeValueStarting("class", "threadItem-title").first();
+        Element articleBody = threadItem.getElementsByAttributeValueStarting("class", "threadItem-body").first();
+        Element articleFooter = threadItem.getElementsByAttributeValueStarting("class", "threadItem-footerMeta").first();
+
+        // 1) image
+        Element threadImage = threadItem.getElementsByAttributeValueStarting("class", "threadItem-image").first();
+        String imageURL = threadImage.getElementsByTag("img").first().attr("src");
+        d(imageURL);
+
+//        // 2)a) temperature & deal status
+//        Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
+//        boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
+//        String temperatureRaw = temperatureBox.text().trim();
+//        int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
+////                    d(dealExpired, temperatureValue);
+//        Attribute temperature = new ExpiringAttribute(dealExpired, temperatureValue);
+//        deal.setTemperature(temperature);
+
+        // 2)b) expiration date, place and publication date
+
     }
 }

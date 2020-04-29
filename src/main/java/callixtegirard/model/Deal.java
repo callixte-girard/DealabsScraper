@@ -4,30 +4,31 @@ import callixtegirard.reference.model.Attribute;
 import okhttp3.HttpUrl;
 
 import java.io.Serializable;
+import java.net.URL;
 
 
 public class Deal implements Serializable
 {
-    private HttpUrl url; // full ? à voir.
-    private Attribute productName;
+    private final URL url; // full ? à voir.
+    private Attribute name;
     private Attribute temperature;
     //////
 
 
-    public Deal(HttpUrl url) {
+    public Deal(URL url) {
         this.url = url;
     }
 
-    public HttpUrl getUrl() {
+    public URL getUrl() {
         return url;
     }
 
-    public Attribute getProductName() {
-        return productName;
+    public Attribute getName() {
+        return name;
     }
 
-    public void setProductName(Attribute productName) {
-        this.productName = productName;
+    public void setName(Attribute name) {
+        this.name = name;
     }
 
     public Attribute getTemperature() {
