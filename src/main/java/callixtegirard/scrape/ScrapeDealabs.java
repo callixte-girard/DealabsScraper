@@ -2,17 +2,13 @@ package callixtegirard.scrape;
 
 import static callixtegirard.util.Debug.*;
 
-import callixtegirard.model.Deal;
+import callixtegirard.model.Item;
 import callixtegirard.reference.model.Attribute;
-import callixtegirard.reference.model.AttributeStatus;
-import callixtegirard.reference.model.ExpiringAttribute;
-import okhttp3.HttpUrl;
-import org.apache.http.client.utils.URIBuilder;
+import callixtegirard.reference.model.OptionalAttribute;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,10 +19,11 @@ import java.net.URL;
 
 public class ScrapeDealabs
 {
-    private static final String urlRoot = "https://www.dealabs.com/";
-    private static final String[] urlsSections = {"hot"};
+    // debug parameters
+    private static boolean debugExtractInfo = true;
 
-    public static void main( String[] args ) throws IOException, URISyntaxException
+
+    public static void main( String[] args ) throws IOException, URISyntaxException, Exception
     {
         try {
 //            ChromeDriver browser = new ChromeDriver();
@@ -37,12 +34,6 @@ public class ScrapeDealabs
             {
                 pageIndex ++;
 
-                /*HttpUrl url = new HttpUrl.Builder()
-                        .scheme("https")
-                        .host("dealabs.com")
-                        .addPathSegment("hot")
-                        .addQueryParameter("page", String.valueOf(pageIndex))
-                        .build();*/
                 String scheme = "https";
                 String authority = "dealabs.com";
                 String path = "/hot";
@@ -83,37 +74,61 @@ public class ScrapeDealabs
         }
     }
 
-    private static void scrapeDeal(String urlString) throws MalformedURLException, IOException
+    private static void scrapeDeal(String urlString) throws MalformedURLException, IOException, NullPointerException, Exception
     {
         URL url = new URL(urlString);
-//        d(url.getPath()); // bon à savoir !
+        d(url.getPath());
+        Item item = new Item(url);
 
-        Deal deal = new Deal(url);
 
         Document doc = Jsoup.connect(urlString).get();
 
         Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
 
-        Element articleHeader = threadItem.getElementsByAttributeValueStarting("class", "threadItem-headerMeta").first();
-        Element articleTitle = threadItem.getElementsByAttributeValueStarting("class", "threadItem-title").first();
-        Element articleBody = threadItem.getElementsByAttributeValueStarting("class", "threadItem-body").first();
-        Element articleFooter = threadItem.getElementsByAttributeValueStarting("class", "threadItem-footerMeta").first();
+        Element dealHeader = threadItem.getElementsByAttributeValueStarting("class", "threadItem-headerMeta").first();
+        Element dealTitle = threadItem.getElementsByAttributeValueStarting("class", "threadItem-title").first();
+        Element dealBody = threadItem.getElementsByAttributeValueStarting("class", "threadItem-body").first();
+        Element dealFooter = threadItem.getElementsByAttributeValueStarting("class", "threadItem-footerMeta").first();
 
         // 1) image
-        Element threadImage = threadItem.getElementsByAttributeValueStarting("class", "threadItem-image").first();
+        Element threadImage = doc.getElementsByAttributeValueStarting("class", "threadItem-image").first();
         String imageURL = threadImage.getElementsByTag("img").first().attr("src");
         d(imageURL);
 
-//        // 2)a) temperature & deal status
-//        Element temperatureBox = articleHeader.getElementsByAttributeValueContaining("class", "vote-box").first();
-//        boolean dealExpired = temperatureBox.attr("class").contains("vote-box--muted");
-//        String temperatureRaw = temperatureBox.text().trim();
+        // 2)a) temperature & deal status
+        Element temperatureBox = doc.getElementsByAttributeValueContaining("class", "vote-box").first();
+        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
+        String temperatureRaw = temperatureBox.text().trim();
 //        int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
-////                    d(dealExpired, temperatureValue);
-//        Attribute temperature = new ExpiringAttribute(dealExpired, temperatureValue);
-//        deal.setTemperature(temperature);
+        d(expired, temperatureRaw);
 
-        // 2)b) expiration date, place and publication date
+        // 2)b) location and shipping infos
+        item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
+        item.addAttribute(extractInfoFromAssociatedIcon("location", doc, "location"));
+        // 2)c) publication and expiration dates
+        item.addAttribute(extractInfoFromAssociatedIcon("datePublished", doc, "clock"));
+        item.addAttribute(extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass"));
 
+
+
+
+    }
+
+
+    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
+    {
+        Attribute attribute;
+        try {
+            Element icon = doc.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
+//            d(iconWorld);
+            String shippingText = icon.parent().parent().text();
+//            d(shippingText);
+            attribute = new OptionalAttribute(attributeName, true, shippingText);
+
+        } catch (NullPointerException nullPointerException) {
+            attribute = new OptionalAttribute(attributeName, false, null);
+        }
+        if (debugExtractInfo) d(attribute);
+        return attribute;
     }
 }

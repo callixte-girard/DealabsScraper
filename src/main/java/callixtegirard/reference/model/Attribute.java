@@ -3,7 +3,7 @@ package callixtegirard.reference.model;
 
 public abstract class Attribute
 {
-//    protected String name;
+    protected String name;
     protected AttributeStatus status;
     protected Object value;
 
