@@ -13,10 +13,41 @@ import java.nio.file.Paths;
 import static callixtegirard.util.Debug.d;
 
 
-public class Test
+public class MainTest
 {
     public static void main(String[] args) throws Exception
     {
+        Document docTest = Jsoup.connect("https://www.google.fr").get();
+
+        // interface tests 1
+        // #V1 old school as hell but very clear.
+        new ScraperTest(new ScraperInterface() {
+            @Override
+            public String extractFromDoc(Document doc) {
+                return doc.title();
+            }
+        });
+        // #V2 old school but as efficient
+        new ScraperTest((Document doc) -> {
+            return doc.title();
+        });
+
+        // #Vb1 cleaner for one-line methods
+        new ScraperTest((Document doc) -> doc.title());
+        // #Vb2 really cool for one-line methods !
+        new ScraperTest(Document::title);
+
+        // now call it ! yé
+
+        // interface tests 2
+        /*MyInterface pipou = (Document poupi) -> {
+            d(poupi);
+            return "coucou mon fwewe";
+        };
+
+        String uf = pipou.extractFromDoc(doc);
+        d(uf);*/
+
 //        Attribute.create("optionalAttr", null, 3);
 //        Attribute.create("optionalAttr", null, null);
 //        Attribute.create("permanentAttr", "pipou", 5);
@@ -35,9 +66,6 @@ public class Test
 //        FileOutputStream fos = new FileOutputStream(testOutputPath);
 //        fos.write();
 //        fos.close();
-
-
-
 
         /*URI uri = new URI("https://www.dealabs.com/hot?page=1");
         d(uri.getAuthority(), uri.getQuery(), uri.getPath(), uri.getPort());

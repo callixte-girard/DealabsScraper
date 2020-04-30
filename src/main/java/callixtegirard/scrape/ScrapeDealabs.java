@@ -117,16 +117,12 @@ public class ScrapeDealabs
 
     private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
     {
+        // TODO make an interface that takes a Document and outputs a String avoid NPExcs, just like this one.
         Attribute attribute;
-//        try {
-            Element icon = doc.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
-            String attributeValue = Attribute.STATUS_EMPTY;
-            if (icon != null) attributeValue = icon.parent().parent().text();
-            attribute = Attribute.create(attributeName, attributeValue);
-
-//        } catch (NullPointerException nullPointerException) {
-//            attribute = Attribute.create(attributeName, null);
-//        }
+        Element icon = doc.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
+        String attributeValue = Attribute.STATUS_EMPTY;
+        if (icon != null) attributeValue = icon.parent().parent().text();
+        attribute = Attribute.create(attributeName, attributeValue);
         if (debugExtractInfo) d(attribute);
         return attribute;
     }

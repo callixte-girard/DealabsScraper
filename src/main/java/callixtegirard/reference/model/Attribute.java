@@ -3,9 +3,11 @@ package callixtegirard.reference.model;
 
 
 
+import org.jsoup.nodes.Document;
+
 import static callixtegirard.util.Debug.d;
 
-public class Attribute
+public class Attribute //implements MyInterface
 {
     public static final boolean debug = true;
 
@@ -49,6 +51,9 @@ public class Attribute
     }
 
 
+//    public static Attribute extract
+
+
     public static Attribute create(String attrName, Object attrValue)
     {
         return create(attrName, attrValue, Attribute.STATUS_DEFAULT);
@@ -61,4 +66,9 @@ public class Attribute
         if (debug) d(attr);
         return attr;
     }
+
+    /*@Override
+    public String extractFromDoc(Document doc) {
+
+    }*/
 }
