@@ -4,7 +4,6 @@ import static callixtegirard.util.Debug.*;
 
 import callixtegirard.model.Item;
 import callixtegirard.reference.model.Attribute;
-import callixtegirard.reference.model.OptionalAttribute;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,8 +19,7 @@ import java.net.URL;
 public class ScrapeDealabs
 {
     // debug parameters
-    private static boolean debugExtractInfo = true;
-
+    //////
 
     public static void main( String[] args ) throws IOException, URISyntaxException, Exception
     {
@@ -90,32 +88,34 @@ public class ScrapeDealabs
         Element dealBody = threadItem.getElementsByAttributeValueStarting("class", "threadItem-body").first();
         Element dealFooter = threadItem.getElementsByAttributeValueStarting("class", "threadItem-footerMeta").first();
 
-        // 1) image
+        // image
         Element threadImage = doc.getElementsByAttributeValueStarting("class", "threadItem-image").first();
         String imageURL = threadImage.getElementsByTag("img").first().attr("src");
-        d(imageURL);
+//        d(imageURL);
+        Attribute.create("imageURL", imageURL);
 
-        // 2)a) temperature & deal status
+        // temperature & deal status
         Element temperatureBox = doc.getElementsByAttributeValueContaining("class", "vote-box").first();
-        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
+//        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
         String temperatureRaw = temperatureBox.text().trim();
 //        int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
-        d(expired, temperatureRaw);
+        String[] temperatureSplit = temperatureRaw.split(" ");
+        String temperatureStatus = Attribute.STATUS_DEFAULT;
+        if (temperatureSplit.length > 1) temperatureStatus = temperatureSplit[1];
+//        d(expired, temperatureRaw);
+        Attribute.create("temperature", temperatureRaw, temperatureStatus); // TODO maybe replace expired byt its indicated status on the page
 
-        // 2)b) location and shipping infos
-        item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
+        // location and shipping infos
+        /*item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
         item.addAttribute(extractInfoFromAssociatedIcon("location", doc, "location"));
-        // 2)c) publication and expiration dates
+        // publication and expiration dates
         item.addAttribute(extractInfoFromAssociatedIcon("datePublished", doc, "clock"));
-        item.addAttribute(extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass"));
-
-
-
+        item.addAttribute(extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass"));*/
 
     }
 
 
-    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
+    /*private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
     {
         Attribute attribute;
         try {
@@ -123,12 +123,12 @@ public class ScrapeDealabs
 //            d(iconWorld);
             String shippingText = icon.parent().parent().text();
 //            d(shippingText);
-            attribute = new OptionalAttribute(attributeName, true, shippingText);
+            attribute = new Attribute(attributeName, true, shippingText);
 
         } catch (NullPointerException nullPointerException) {
-            attribute = new OptionalAttribute(attributeName, false, null);
+            attribute = new Attribute(attributeName, false, null);
         }
         if (debugExtractInfo) d(attribute);
         return attribute;
-    }
+    }*/
 }

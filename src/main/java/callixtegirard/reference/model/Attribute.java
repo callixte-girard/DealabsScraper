@@ -1,17 +1,30 @@
 package callixtegirard.reference.model;
 
 
-public abstract class Attribute
-{
-    protected String name;
-    protected AttributeStatus status;
-    protected Object value;
 
-    /*public Attribute(String name, AttributeStatus status, Object value) {
-        this.name = name;
-        this.status = status;
-        this.value = value;
+
+import static callixtegirard.util.Debug.d;
+
+public class Attribute
+{
+    public static final boolean debug = true;
+
+    // TODO maybe replace String status with one of this enum directly with the tow create() methods.
+    /*public enum Status {
+        AVAILABLE,
     }*/
+    public static final String STATUS_DEFAULT = "default";
+    public static final String STATUS_PERMANENT = null;
+
+    protected String name;
+    protected String value;
+    protected String status;
+
+    public Attribute(String name, String value, String status) {
+        this.name = name;
+        this.value = value;
+        this.status = status;
+    }
 
     /*public Attribute(AttributeStatus status, Object value) {
         this.status = status;
@@ -28,9 +41,23 @@ public abstract class Attribute
     @Override
     public String toString() {
         return "Attribute{" +
-//                "name='" + name + '\'' + " ," +
-                "status=" + status + ", " +
-                "value=" + value +
+                "name=" + name + ", " +
+                "value=" + value + ", " +
+                "status=" + status +
                 '}';
+    }
+
+
+    public static Attribute create(String attrName, Object attrValue)
+    {
+        return create(attrName, attrValue, Attribute.STATUS_PERMANENT);
+    }
+
+
+    public static Attribute create(String attrName, Object attrValue, Object attrState)
+    {
+        Attribute attr = new Attribute(attrName, String.valueOf(attrValue), String.valueOf(attrState));
+        if (debug) d(attr);
+        return attr;
     }
 }
