@@ -14,13 +14,13 @@ public class Attribute
         AVAILABLE,
     }*/
     public static final String STATUS_DEFAULT = "default";
-    public static final String STATUS_PERMANENT = null;
+    public static final String STATUS_EMPTY = null;
 
     protected String name;
     protected String value;
     protected String status;
 
-    public Attribute(String name, String value, String status) {
+    private Attribute(String name, String value, String status) {
         this.name = name;
         this.value = value;
         this.status = status;
@@ -40,17 +40,18 @@ public class Attribute
 
     @Override
     public String toString() {
-        return "Attribute{" +
-                "name=" + name + ", " +
-                "value=" + value + ", " +
-                "status=" + status +
-                '}';
+        String out = "";
+        out += "Attribute{" + "name=" + name;
+        out += ", " +"value=" + value;
+        if (this.status.equals(STATUS_DEFAULT)) out += ", " +"status=" + status;
+        out += '}';
+        return out;
     }
 
 
     public static Attribute create(String attrName, Object attrValue)
     {
-        return create(attrName, attrValue, Attribute.STATUS_PERMANENT);
+        return create(attrName, attrValue, Attribute.STATUS_DEFAULT);
     }
 
 

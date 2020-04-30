@@ -19,6 +19,7 @@ import java.net.URL;
 public class ScrapeDealabs
 {
     // debug parameters
+    private static final boolean debugExtractInfo = false;
     //////
 
     public static void main( String[] args ) throws IOException, URISyntaxException, Exception
@@ -91,44 +92,42 @@ public class ScrapeDealabs
         // image
         Element threadImage = doc.getElementsByAttributeValueStarting("class", "threadItem-image").first();
         String imageURL = threadImage.getElementsByTag("img").first().attr("src");
-//        d(imageURL);
-        Attribute.create("imageURL", imageURL);
+        item.addAttribute(Attribute.create("imageURL", imageURL));
 
         // temperature & deal status
         Element temperatureBox = doc.getElementsByAttributeValueContaining("class", "vote-box").first();
 //        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
         String temperatureRaw = temperatureBox.text().trim();
-//        int temperatureValue = Integer.parseInt(temperatureRaw.split(" ")[0].split("°")[0]);
         String[] temperatureSplit = temperatureRaw.split(" ");
         String temperatureStatus = Attribute.STATUS_DEFAULT;
         if (temperatureSplit.length > 1) temperatureStatus = temperatureSplit[1];
-//        d(expired, temperatureRaw);
-        Attribute.create("temperature", temperatureRaw, temperatureStatus); // TODO maybe replace expired byt its indicated status on the page
+        item.addAttribute(Attribute.create("temperature", temperatureRaw, temperatureStatus));
 
         // location and shipping infos
-        /*item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
+        item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
         item.addAttribute(extractInfoFromAssociatedIcon("location", doc, "location"));
+
         // publication and expiration dates
         item.addAttribute(extractInfoFromAssociatedIcon("datePublished", doc, "clock"));
-        item.addAttribute(extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass"));*/
+        Attribute dateExpiration = extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass");
+        item.addAttribute(dateExpiration);
 
     }
 
 
-    /*private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
+    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
     {
         Attribute attribute;
-        try {
+//        try {
             Element icon = doc.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
-//            d(iconWorld);
-            String shippingText = icon.parent().parent().text();
-//            d(shippingText);
-            attribute = new Attribute(attributeName, true, shippingText);
+            String attributeValue = Attribute.STATUS_EMPTY;
+            if (icon != null) attributeValue = icon.parent().parent().text();
+            attribute = Attribute.create(attributeName, attributeValue);
 
-        } catch (NullPointerException nullPointerException) {
-            attribute = new Attribute(attributeName, false, null);
-        }
+//        } catch (NullPointerException nullPointerException) {
+//            attribute = Attribute.create(attributeName, null);
+//        }
         if (debugExtractInfo) d(attribute);
         return attribute;
-    }*/
+    }
 }
