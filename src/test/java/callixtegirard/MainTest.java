@@ -19,10 +19,12 @@ public class MainTest
 {
     public static void main(String[] args) throws Exception
     {
-        /*String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
+        String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
         Document doc = Jsoup.connect(urlString).get();
-        Elements elts = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey");
-        dL(elts);*/
+        Elements elts = doc.getElementsByClass("pipou");
+        Element el = elts.first();
+        d(el); // the NPexc occurs HERE.
+        dL(elts);
 
         /*Document docTest = Jsoup.connect("https://www.google.fr").get();
 

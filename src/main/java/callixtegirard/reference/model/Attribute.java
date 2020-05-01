@@ -3,8 +3,6 @@ package callixtegirard.reference.model;
 
 
 
-import org.jsoup.nodes.Document;
-
 import static callixtegirard.util.Debug.d;
 
 public class Attribute //implements MyInterface
@@ -15,8 +13,7 @@ public class Attribute //implements MyInterface
     /*public enum Status {
         AVAILABLE,
     }*/
-    public static final String STATUS_DEFAULT = "default";
-    public static final String STATUS_EMPTY = null;
+    public static final String STATUS_EMPTY = "(unavailable)";
 
     protected String name;
     protected String value;
@@ -43,9 +40,9 @@ public class Attribute //implements MyInterface
     @Override
     public String toString() {
         String out = "";
-        out += "Attribute{" + "name=" + name;
+        out += "° Attribute{" + "name=" + name;
         out += ", " +"value=" + value;
-        if (!this.status.equals(STATUS_DEFAULT)) out += ", " +"status=" + status;
+        if (!this.status.equals(STATUS_EMPTY)) out += ", " +"status=" + status;
         out += '}';
         return out;
     }
@@ -56,7 +53,7 @@ public class Attribute //implements MyInterface
 
     public static Attribute create(String attrName, Object attrValue)
     {
-        return create(attrName, attrValue, Attribute.STATUS_DEFAULT);
+        return create(attrName, attrValue, Attribute.STATUS_EMPTY);
     }
 
 
