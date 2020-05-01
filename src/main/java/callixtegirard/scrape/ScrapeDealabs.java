@@ -116,7 +116,9 @@ public class ScrapeDealabs
         deal.addAttribute(Attribute.create("pourcentageRabais", pricePercentage));
 
         // prix livraison
-        deal.addAttribute(extractInfoFromAssociatedIcon("prixLivraison", threadTitle, "icon--truck", false));
+        String shippingPrice = extractInfoFromAssociatedIcon(threadTitle, "icon--truck", false);
+        if (shippingPrice.length() > 1) shippingPrice = shippingPrice.split(" ")[1]; // remove Gratuit in double
+        deal.addAttribute(Attribute.create("prixLivraison", shippingPrice));
 
         // vendeur
         Element merchantNameContainer = threadTitle.getElementsByAttributeValueContaining("class", "cept-merchant-name").first();
@@ -148,16 +150,22 @@ public class ScrapeDealabs
         deal.addAttribute(Attribute.create("statut", temperatureStatus));
 
         Element borderMiddle = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(1);
+        // shipping from
+        String shippingFrom = extractInfoFromAssociatedIcon(borderMiddle, "icon--world", true);
+        deal.addAttribute(Attribute.create("livraisonDepuis", shippingFrom));
         // location
-        deal.addAttribute(extractInfoFromAssociatedIcon("livraisonDepuis", borderMiddle, "icon--world", true));
-        deal.addAttribute(extractInfoFromAssociatedIcon("localisation", borderMiddle, "icon--location", true));
+        String location = extractInfoFromAssociatedIcon(borderMiddle, "icon--location", true);
+        deal.addAttribute(Attribute.create("localisation", location));
         // dates (publication and expiration)
-        deal.addAttribute(extractInfoFromAssociatedIcon("postéLe", borderMiddle, "icon--clock text--color-greyShade", true));
-        deal.addAttribute(extractInfoFromAssociatedIcon("dateDébut", borderMiddle, "icon--clock text--color-green", true));
-        deal.addAttribute(extractInfoFromAssociatedIcon("dateFin", borderMiddle, "icon--hourglass", true));
+        String postedOn = extractInfoFromAssociatedIcon(borderMiddle, "icon--clock text--color-greyShade", true);
+        deal.addAttribute(Attribute.create("postéLe", postedOn));
+        String dateStart = extractInfoFromAssociatedIcon(borderMiddle, "icon--clock text--color-green", true);
+        deal.addAttribute(Attribute.create("dateDébut", dateStart));
+        String dateExpiration = extractInfoFromAssociatedIcon(borderMiddle, "icon--hourglass", true);
+        deal.addAttribute(Attribute.create("dateFin", dateExpiration));
         // edition
-        deal.addAttribute(extractInfoFromAssociatedIcon("modification", borderMiddle, "icon--pencil", true));
-
+        String modifiedOn = extractInfoFromAssociatedIcon(borderMiddle, "icon--pencil", true);
+        deal.addAttribute(Attribute.create("modification", modifiedOn));
         // description
         String descriptionWithHtml = doc.getElementsByClass("userHtml userHtml-content").first().child(0).children().outerHtml();
         deal.addAttribute(Attribute.create("description", descriptionWithHtml));
@@ -184,18 +192,16 @@ public class ScrapeDealabs
     }
 
 
-    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Element elt, String iconIdentifier, boolean parentTwice)
+    private static String extractInfoFromAssociatedIcon(Element elt, String iconIdentifier, boolean parentTwice)
     {
         // TODO make an interface that takes a Document and outputs a String avoid NPExcs, just like this one.
-        Attribute attribute;
         Element icon = elt.getElementsByAttributeValueContaining("class", iconIdentifier).first();
         String attributeValue = Attribute.STATUS_EMPTY;
         if (icon != null) {
             if (parentTwice) attributeValue = icon.parent().parent().text().trim();
             else attributeValue = icon.parent().text().trim();
         }
-        attribute = Attribute.create(attributeName, attributeValue);
-        if (debugExtractInfo) d(attribute);
-        return attribute;
+        return attributeValue;
     }
+
 }
