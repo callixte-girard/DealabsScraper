@@ -4,6 +4,7 @@ package callixtegirard;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -11,13 +12,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static callixtegirard.util.Debug.d;
+import static callixtegirard.util.Debug.dL;
 
 
 public class MainTest
 {
     public static void main(String[] args) throws Exception
     {
-        Document docTest = Jsoup.connect("https://www.google.fr").get();
+        /*String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
+        Document doc = Jsoup.connect(urlString).get();
+        Elements elts = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey");
+        dL(elts);*/
+
+        /*Document docTest = Jsoup.connect("https://www.google.fr").get();
 
         // interface tests 1
         // #V1 old school as hell but very clear.
@@ -35,7 +42,7 @@ public class MainTest
         // #Vb1 cleaner for one-line methods
         new ScraperTest((Document doc) -> doc.title());
         // #Vb2 really cool for one-line methods !
-        new ScraperTest(Document::title);
+        new ScraperTest(Document::title);*/
 
         // now call it ! yé
 

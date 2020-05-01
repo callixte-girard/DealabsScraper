@@ -30,6 +30,13 @@ public class Debug {
         }
     }
 
+    public static void dL(List list) {
+        for (Object obj : list) {
+            d(obj);
+            d(l);
+        }
+    }
+
     private static void dList(List list) {
         for (Object obj : list) { d(obj); } d(l);
     }

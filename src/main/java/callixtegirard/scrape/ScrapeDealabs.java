@@ -76,9 +76,9 @@ public class ScrapeDealabs
     private static void scrapeDeal(String urlString) throws MalformedURLException, IOException, NullPointerException, Exception
     {
         URL url = new URL(urlString);
-        d(url.getPath());
+        d(url);
+//        d(url.getPath());
         Item item = new Item(url);
-
 
         Document doc = Jsoup.connect(urlString).get();
 
@@ -94,32 +94,37 @@ public class ScrapeDealabs
         String imageURL = threadImage.getElementsByTag("img").first().attr("src");
         item.addAttribute(Attribute.create("imageURL", imageURL));
 
+        Element borderTemp = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").first();
         // temperature & deal status
         Element temperatureBox = doc.getElementsByAttributeValueContaining("class", "vote-box").first();
 //        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
         String temperatureRaw = temperatureBox.text().trim();
         String[] temperatureSplit = temperatureRaw.split(" ");
-        String temperatureStatus = Attribute.STATUS_DEFAULT;
+        String temperatureValue = temperatureSplit[0];
+        String temperatureStatus;
         if (temperatureSplit.length > 1) temperatureStatus = temperatureSplit[1];
-        item.addAttribute(Attribute.create("temperature", temperatureRaw, temperatureStatus));
+        else temperatureStatus = Attribute.STATUS_DEFAULT;
+        item.addAttribute(Attribute.create("temperature", temperatureValue/*, temperatureStatus*/));
+        item.addAttribute(Attribute.create("expired", temperatureStatus));
 
+        // take the second one
+        Element borderMiddle = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(1);
         // location and shipping infos
-        item.addAttribute(extractInfoFromAssociatedIcon("shipping", doc, "world"));
-        item.addAttribute(extractInfoFromAssociatedIcon("location", doc, "location"));
-
+        item.addAttribute(extractInfoFromAssociatedIcon("livraison", borderMiddle, "world"));
+        item.addAttribute(extractInfoFromAssociatedIcon("localisation", borderMiddle, "location"));
         // publication and expiration dates
-        item.addAttribute(extractInfoFromAssociatedIcon("datePublished", doc, "clock"));
-        Attribute dateExpiration = extractInfoFromAssociatedIcon("dateExpiration", doc, "hourglass");
+        item.addAttribute(extractInfoFromAssociatedIcon("dateDebut", borderMiddle, "clock"));
+        Attribute dateExpiration = extractInfoFromAssociatedIcon("dateFin", borderMiddle, "hourglass");
         item.addAttribute(dateExpiration);
 
     }
 
 
-    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Document doc, String iconIdentifier)
+    private static Attribute extractInfoFromAssociatedIcon(String attributeName, Element elt, String iconIdentifier)
     {
         // TODO make an interface that takes a Document and outputs a String avoid NPExcs, just like this one.
         Attribute attribute;
-        Element icon = doc.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
+        Element icon = elt.getElementsByAttributeValueContaining("class", "icon--" + iconIdentifier).first();
         String attributeValue = Attribute.STATUS_EMPTY;
         if (icon != null) attributeValue = icon.parent().parent().text();
         attribute = Attribute.create(attributeName, attributeValue);

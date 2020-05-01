@@ -45,7 +45,7 @@ public class Attribute //implements MyInterface
         String out = "";
         out += "Attribute{" + "name=" + name;
         out += ", " +"value=" + value;
-        if (this.status.equals(STATUS_DEFAULT)) out += ", " +"status=" + status;
+        if (!this.status.equals(STATUS_DEFAULT)) out += ", " +"status=" + status;
         out += '}';
         return out;
     }
@@ -60,7 +60,7 @@ public class Attribute //implements MyInterface
     }
 
 
-    public static Attribute create(String attrName, Object attrValue, Object attrState)
+    private static Attribute create(String attrName, Object attrValue, Object attrState)
     {
         Attribute attr = new Attribute(attrName, String.valueOf(attrValue), String.valueOf(attrState));
         if (debug) d(attr);
