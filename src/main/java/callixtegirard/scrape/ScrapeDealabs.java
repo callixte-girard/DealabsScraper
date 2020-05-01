@@ -21,6 +21,8 @@ public class ScrapeDealabs
     /*
     TODO :
     - refaire la partie Voir le deal / Voir le code promo à partir de threadItem
+    - refaire la partie température / statut pour qu'ils soient séparés
+    - différencier les attributs toujours présents (throw une exception s'ils ne sont pas là) et les attributs facultatifs (eux non lolilol)
     V rajouter "posté le" (différent de "commence le")
     - remove hyphens in last edition
     - ajouter gestion des codes promo avec Selenium (il faut cliquer qqepart sur le <span class="voucher-label lbox--v-4 boxAlign-jc--all-c size--all-m text--color-white"><span class="hide--fromW2">Voir le code promo</span><span class="hide--toW2 hide--fromW3">Voir le code promo</span><span class="hide--toW3">Voir le code promo</span></span>)
@@ -56,11 +58,11 @@ public class ScrapeDealabs
                 Document doc = Jsoup.connect(url.toString()).get();
 //                d(doc);
 
-                Elements deals = doc.getElementsByTag("article");
-                for (Element deal : deals)
+                Elements dealItems = doc.getElementsByTag("article");
+                for (Element dealItem : dealItems)
                 {
                     // get deal detail url
-                    Element link = deal.getElementsByAttributeValueContaining("class", "linkPlain").first();
+                    Element link = dealItem.getElementsByAttributeValueContaining("class", "linkPlain").first();
                     String dealUrl = link.attr("href");
 //                    d(dealUrl);
 
@@ -68,12 +70,13 @@ public class ScrapeDealabs
                     /////// (not necesary here)
 
                     // scrape infos in Detail View
-                    scrapeDeal(dealUrl);
+                    Item deal = scrapeDeal(dealUrl);
+                    d(deal);
                     d(l);
 
 //                    finished = true; // to test TODO remove me and replace be my the good indicator : dates
                 }
-                d("page n°", pageIndex, "contains", deals.size(), "articles");
+                d("page n°", pageIndex, "contains", dealItems.size(), "articles");
                 d(s);
             }
 
@@ -90,20 +93,30 @@ public class ScrapeDealabs
         Item deal = new Item(url);
 
         Document doc = Jsoup.connect(urlString).get();
+
+        // main deal container
         Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
 
-        Element threadHeader = threadItem.getElementsByAttributeValueStarting("class", "threadItem-headerMeta").first();
-        Element threadBody = threadItem.getElementsByAttributeValueStarting("class", "threadItem-body").first();
+        // other level 1 subcontainers : are they really useful ?
+        Element threadHeader = threadItem.getElementsByAttributeValueStarting
+                ("class", "threadItem-headerMeta").first();
+        Element threadBody = threadItem.getElementsByAttributeValueStarting
+                ("class", "threadItem-body").first();
 
-        Element threadTitle = threadItem.getElementsByAttributeValueStarting("class", "threadItem-title").first();
-        // title
+        // thread section 1 : title
+        Element threadTitle = threadItem.
+                getElementsByAttributeValueStarting("class", "threadItem-title").first();
         String title = threadTitle.getElementsByClass("thread-title").first().text().trim();
         deal.addAttribute(Attribute.create("titre", title));
 
-        // prix original / avec rabais / pourcentage de rabais
+        // price proposed [example of AttributeRequired]
         Element subTitle = threadTitle.getElementsByClass("overflow--fade").first();
         String priceReduced = subTitle.getElementsByClass("overflow--wrap-off").get(0).text().trim();
-        Element priceReductionContainer = subTitle.getElementsByClass("flex--inline boxAlign-ai--all-c space--ml-2").first();
+        deal.addAttribute(Attribute.create("prixRabais", priceReduced));
+
+        // price reduction [example of AttributeOptionnal]
+        Element priceReductionContainer = subTitle.getElementsByClass
+                ("flex--inline boxAlign-ai--all-c space--ml-2").first();
         String priceOriginal = Attribute.STATUS_EMPTY;
         String pricePercentage = Attribute.STATUS_EMPTY;
         if (priceReductionContainer != null) {
@@ -111,63 +124,110 @@ public class ScrapeDealabs
             if (priceReductionContainer.childrenSize() > 1)
                 pricePercentage = priceReductionContainer.child(1).text().trim();
         }
-        deal.addAttribute(Attribute.create("prixRabais", priceReduced));
         deal.addAttribute(Attribute.create("prixOriginal", priceOriginal));
         deal.addAttribute(Attribute.create("pourcentageRabais", pricePercentage));
 
-        // prix livraison
-        String shippingPrice = extractInfoFromAssociatedIcon(threadTitle, "icon--truck", false);
+        // shipping price [STRANGE example of AttributeRequired]
+        Element containerShippingPrice = threadTitle.getElementsByAttributeValueContaining
+                ("class", "icon--truck").first();
+        String shippingPrice = extractAttributeValueFromContainer(containerShippingPrice, false);
         if (shippingPrice.length() > 1) shippingPrice = shippingPrice.split(" ")[1]; // remove Gratuit in double
         deal.addAttribute(Attribute.create("prixLivraison", shippingPrice));
 
-        // vendeur
-        Element merchantNameContainer = threadTitle.getElementsByAttributeValueContaining("class", "cept-merchant-name").first();
+        // merchant name [example of AttributeOptionnal]
+        Element merchantNameContainer = threadTitle.getElementsByAttributeValueContaining
+                ("class", "cept-merchant-name").first();
         String merchantName = Attribute.STATUS_EMPTY;
         if (merchantNameContainer != null) merchantName = merchantNameContainer.text().trim();
         deal.addAttribute(Attribute.create("vendeur", merchantName));
 
-        // le mec qui a posté le deal
-        Element threadFooter = threadItem.getElementsByAttributeValueStarting("class", "threadItem-footerMeta").first();
-        String posterUsername = threadFooter.getElementsByAttributeValueContaining("class", "thread-username").text().trim();
-        deal.addAttribute(Attribute.create("proposéPar", posterUsername));
+        // thread section 3 : footer
+        Element threadFooter = threadItem.getElementsByAttributeValueStarting
+                ("class", "threadItem-footerMeta").first();
 
-        // image
-        Element threadImage = doc.getElementsByAttributeValueStarting("class", "threadItem-image").first();
-        String imageURL = threadImage.getElementsByTag("img").first().attr("src");
+        // posted by (name) [example of AttributeRequired]
+        Element containerPosterUsername = threadFooter.getElementsByAttributeValueContaining
+                ("class", "thread-username").first();
+        String posterUsername = containerPosterUsername.text().trim();
+        deal.addAttribute(Attribute.create("pseudoPublicateur", posterUsername));
+
+        // posted by (title) [example of AttributeOptional]
+        Element containerPosterTitle = threadFooter.getElementsByAttributeValueContaining
+                ("class", "cept-user-title").first();
+        String posterTitle = containerPosterTitle.text().trim();
+        deal.addAttribute(Attribute.create("titrePublicateur", posterTitle));
+
+        // thread section 2 : image
+        Element threadImage = doc.getElementsByAttributeValueStarting
+                ("class", "threadItem-image").first();
+        Element containerImage = threadImage.getElementsByTag("img").first();
+        String imageURL = containerImage.attr("src");
         deal.addAttribute(Attribute.create("imageURL", imageURL));
 
-        Element borderTemp = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(0);
-        // temperature & deal status
-        Element temperatureBox = borderTemp.getElementsByAttributeValueContaining("class", "vote-box").first();
-//        boolean expired = temperatureBox.attr("class").contains("vote-box--muted");
-        String temperatureRaw = temperatureBox.text().trim();
+        // border 1 (beginning)
+        Element borderBeginning = doc.getElementsByAttributeValueContaining
+                ("class", "border--color-borderGrey").get(0);
+
+        // temperature [example of AttributeRequired]
+        Element containerTemperature = borderBeginning.getElementsByAttributeValueContaining
+                ("class", "vote-box").first();
+//        boolean expired = containerTemperatre.attr("class").contains("vote-box--muted");
+        // TODO redo more cleanly
+        String temperatureRaw = containerTemperature.text().trim();
         String[] temperatureSplit = temperatureRaw.split(" ");
         String temperatureValue = temperatureSplit[0];
+        deal.addAttribute(Attribute.create("température", temperatureValue));
+
+        // status [example of OptionalAttribute]
         String temperatureStatus;
         if (temperatureSplit.length > 1) temperatureStatus = temperatureSplit[1];
         else temperatureStatus = Attribute.STATUS_EMPTY;
-        deal.addAttribute(Attribute.create("température", temperatureValue/*, temperatureStatus*/));
         deal.addAttribute(Attribute.create("statut", temperatureStatus));
 
-        Element borderMiddle = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(1);
-        // shipping from
-        String shippingFrom = extractInfoFromAssociatedIcon(borderMiddle, "icon--world", true);
+        // border 2 (middle)
+        Element borderMiddle = doc.getElementsByAttributeValueContaining
+                ("class", "border--color-borderGrey").get(1);
+
+        // shippingFrom [example of OptionalAttribute]
+        Element containerShippingFrom = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--world").first();
+        String shippingFrom = extractAttributeValueFromContainer(containerShippingFrom, true);
         deal.addAttribute(Attribute.create("livraisonDepuis", shippingFrom));
-        // location
-        String location = extractInfoFromAssociatedIcon(borderMiddle, "icon--location", true);
+
+        // location [example of OptionalAttribute]
+        Element containerLocation = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--location").first();
+        String location = extractAttributeValueFromContainer(containerLocation, true);
         deal.addAttribute(Attribute.create("localisation", location));
-        // dates (publication and expiration)
-        String postedOn = extractInfoFromAssociatedIcon(borderMiddle, "icon--clock text--color-greyShade", true);
+
+        // posted on [example of RequiredAttribute]
+        Element containerPostedOn = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--clock text--color-greyShade").first();
+        String postedOn = extractAttributeValueFromContainer(containerPostedOn, true);
         deal.addAttribute(Attribute.create("postéLe", postedOn));
-        String dateStart = extractInfoFromAssociatedIcon(borderMiddle, "icon--clock text--color-green", true);
+
+        // date start [example of OptionalAttribute]
+        Element containerDateStart = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--clock text--color-green").first();
+        String dateStart = extractAttributeValueFromContainer(containerDateStart, true);
         deal.addAttribute(Attribute.create("dateDébut", dateStart));
-        String dateExpiration = extractInfoFromAssociatedIcon(borderMiddle, "icon--hourglass", true);
+
+        // date expiration [example of OptionalAttribute]
+        Element containerDateExpiration = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--hourglass").first();
+        String dateExpiration = extractAttributeValueFromContainer(containerDateExpiration, true);
         deal.addAttribute(Attribute.create("dateFin", dateExpiration));
-        // edition
-        String modifiedOn = extractInfoFromAssociatedIcon(borderMiddle, "icon--pencil", true);
+
+        // date last modification [example of OptionalAttribute]
+        Element containerModifiedOn = borderMiddle.getElementsByAttributeValueContaining
+                ("class", "icon--pencil").first();
+        String modifiedOn = extractAttributeValueFromContainer(containerModifiedOn, true);
         deal.addAttribute(Attribute.create("modification", modifiedOn));
-        // description
-        String descriptionWithHtml = doc.getElementsByClass("userHtml userHtml-content").first().child(0).children().outerHtml();
+
+        // description [example of RequiredAttribute]
+        Element containerDescription = doc.getElementsByAttributeValueContaining
+                ("class", "userHtml-content").first();
+        String descriptionWithHtml = containerDescription.child(0).children().outerHtml();
         deal.addAttribute(Attribute.create("description", descriptionWithHtml));
 
         // TODO link to the deal (but it will just be the redirection link on dealabs...)
@@ -192,14 +252,15 @@ public class ScrapeDealabs
     }
 
 
-    private static String extractInfoFromAssociatedIcon(Element elt, String iconIdentifier, boolean parentTwice)
+    private static String extractAttributeValueFromContainer(Element attributeContainer, boolean parentTwice)
     {
-        // TODO make an interface that takes a Document and outputs a String avoid NPExcs, just like this one.
-        Element icon = elt.getElementsByAttributeValueContaining("class", iconIdentifier).first();
+        // takes an Element and outputs a String and avoids NPExcs (because there is a possibility they don't exist)
         String attributeValue = Attribute.STATUS_EMPTY;
-        if (icon != null) {
-            if (parentTwice) attributeValue = icon.parent().parent().text().trim();
-            else attributeValue = icon.parent().text().trim();
+        if (attributeContainer != null) {
+            // ***** this part must be inputted as an interface
+            if (parentTwice) attributeValue = attributeContainer.parent().parent().text().trim();
+            else attributeValue = attributeContainer.parent().text().trim();
+            // *****
         }
         return attributeValue;
     }

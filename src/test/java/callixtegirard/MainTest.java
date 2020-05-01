@@ -21,10 +21,11 @@ public class MainTest
     {
         String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
         Document doc = Jsoup.connect(urlString).get();
-        Elements elts = doc.getElementsByClass("pipou");
-        Element el = elts.first();
-        d(el); // the NPexc occurs HERE.
-        dL(elts);
+//        Elements elts = doc.getElementsByClass("pipou");
+//        Element el = elts.first();
+//        Element el = doc.getElementsByClass("pipou").first();
+//        d(el); // the NPexc occurs HERE.
+//        dL(elts);
 
         /*Document docTest = Jsoup.connect("https://www.google.fr").get();
 
