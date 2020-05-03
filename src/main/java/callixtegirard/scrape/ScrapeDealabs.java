@@ -221,8 +221,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--world").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // location [AttrOpt]
@@ -230,8 +229,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--location").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // posted on [AttrReq]
@@ -239,8 +237,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--clock text--color-greyShade").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // date start [AttrOpt]
@@ -248,8 +245,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--clock text--color-green").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // date expiration [AttrOpt]
@@ -257,8 +253,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--hourglass").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // date last modification [AttrOpt]
@@ -266,8 +261,7 @@ public class ScrapeDealabs
                 borderMiddle,
                 elt -> elt.text().trim()/*.replace("\"", "")*/,
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--pencil").first(),
-                elt -> elt.parent(),
-                elt -> elt.parent()
+                elt -> elt.parent().parent()
         ));
 
         // description [AttrReq]
