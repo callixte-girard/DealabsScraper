@@ -1,7 +1,5 @@
 package callixtegirard.model;
 
-import callixtegirard.reference.model.Attribute;
-
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,6 +15,14 @@ public class Item implements Serializable
         this.url = url;
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "url=" + url +
+                ", attributes=" + attributes +
+                '}';
+    }
+
     public URL getUrl() {
         return url;
     }
@@ -26,8 +32,9 @@ public class Item implements Serializable
     }
 
     public void addAttribute(Attribute attribute) throws Exception {
-        if (this.attributes.contains(attribute)) throw new Exception(attribute + " already present in list !");
-        this.attributes.add(attribute);
+        if (this.attributes.contains(attribute))
+            throw new Exception(attribute + " already present in list !");
+        else this.attributes.add(attribute);
     }
 
 
