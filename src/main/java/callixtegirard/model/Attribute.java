@@ -34,7 +34,7 @@ public abstract class Attribute //implements MyInterface
     @Override
     public String toString() {
         String out = "";
-        out += "° " + this.getClass().toString() + "{" + "name=" + name;
+        out += "° " + this.getClass().getSimpleName() + "{" + "name=" + name;
         out += ", " +"value=" + value;
         if (!this.status.equals(STATUS_EMPTY)) out += ", " +"status=" + status;
         out += '}';

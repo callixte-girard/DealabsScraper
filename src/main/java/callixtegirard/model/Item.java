@@ -15,6 +15,14 @@ public class Item implements Serializable
         this.url = url;
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "url=" + url +
+                ", attributes=" + attributes +
+                '}';
+    }
+
     public URL getUrl() {
         return url;
     }

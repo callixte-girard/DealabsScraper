@@ -21,11 +21,13 @@ public class MainTest
     {
         String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
         Document doc = Jsoup.connect(urlString).get();
-        Elements elts = doc.getElementsByClass("pipou");
-        Element el = elts.first();
-        el = el.parent(); // that triggers an NPexc.
-        d(el); // the NPexc occurs HERE.
-//        dL(elts);
+//        Elements elts = doc.getElementsByClass("pipou");
+        Elements elts = doc.getElementsByClass("userHtml userHtml-content");
+//        Element el = elts.first(); // this doesn't throw a NPexc.
+//        Element el = elts.get(0); // THIS throws en NPexc.
+//        el = el.parent(); // that triggers an NPexc.
+//        d(el); // the NPexc occurs HERE.
+        dL(elts);
 
         /*Document docTest = Jsoup.connect("https://www.google.fr").get();
 
