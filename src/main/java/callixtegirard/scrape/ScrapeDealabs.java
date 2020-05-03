@@ -206,6 +206,7 @@ public class ScrapeDealabs
                 elt -> {
                     String val = elt.text().trim();
                     if (val.split(" ").length > 1) val = val.split(" ")[1];
+                    else val = Attribute.STATUS_EMPTY;
                     return val;
                 },
                 elt -> elt.getElementsByAttributeValueContaining("class", "vote-box").first()
