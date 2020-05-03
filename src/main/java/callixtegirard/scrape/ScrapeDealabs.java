@@ -3,15 +3,11 @@ package callixtegirard.scrape;
 import static callixtegirard.util.Debug.*;
 
 import callixtegirard.model.*;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 
@@ -20,30 +16,30 @@ public class ScrapeDealabs
     /*
     TODO :
     - refaire la partie Voir le deal / Voir le code promo à partir de threadItem
-    - refaire la partie température / statut pour qu'ils soient séparés
-    - différencier les attributs toujours présents (throw une exception s'ils ne sont pas sur la page) et les attributs facultatifs (qui ne sont pas nécessairement présents sur la page)
-    V rajouter "posté le" (différent de "commence le")
-    - remove quotes in last edition
     - ajouter gestion des codes promo avec Selenium (il faut cliquer qqepart sur le <span class="voucher-label lbox--v-4 boxAlign-jc--all-c size--all-m text--color-white"><span class="hide--fromW2">Voir le code promo</span><span class="hide--toW2 hide--fromW3">Voir le code promo</span><span class="hide--toW3">Voir le code promo</span></span>)
-    - intégrer l'interfaçage des éléments dans la dernière méthode de la page, pour gérer proprement ce qui peut être nul et prévenir de ce qui ne doit pas l'être.
-    - maybe refaire enum pour les status (mais bon, autant le considérer comme un attribute hein)
+    - refaire la partie température / statut pour qu'ils soient séparés
+    - implémenter l'arrêt une fois les dernières 24h dépassées
+    V intégrer l'interfaçage des éléments dans la dernière méthode de la page, pour gérer proprement ce qui peut être nul et prévenir de ce qui ne doit pas l'être.
+    V différencier les attributs toujours présents (throw une exception s'ils ne sont pas sur la page) et les attributs facultatifs (qui ne sont pas nécessairement présents sur la page)
+    V rajouter "posté le" (différent de "commence le")
     V rajouter les frais de livraison (section subtitle et non middle). Transformer la dernière méthode pour la scinder en deux (et rajouter un argument simple ou double .parent())
+    A maybe refaire enum pour les status (mais bon, autant le considérer comme un attribute hein)
+    O remove quotes in last edition
      */
+
+    private static RequestHandler reqHandler = new RequestHandler(true, null);
 
     // debug parameters
     private static final boolean debugExtractInfo = false;
-    //////
+    ///////
 
-    public static void main( String[] args ) throws IOException, URISyntaxException, Exception
+    public static void main( String[] args ) throws Exception//, IOException, URISyntaxException,
     {
         try {
-//            ChromeDriver browser = new ChromeDriver();
-
             int pageIndex = 0;
             boolean finished = false;
-            while (!finished)
-            {
-                pageIndex ++;
+            while (!finished) {
+                pageIndex++;
 
                 String scheme = "https";
                 String authority = "dealabs.com";
@@ -54,12 +50,11 @@ public class ScrapeDealabs
                 URL url = uri.toURL();
 //                d(url);
 
-                Document doc = Jsoup.connect(url.toString()).get();
-//                d(doc);
+                // includes selenium or jsoup
+                Document doc = reqHandler.getHTML(url.toString(), false); // don't need selenium here
 
                 Elements dealItems = doc.getElementsByTag("article");
-                for (Element dealItem : dealItems)
-                {
+                for (Element dealItem : dealItems) {
                     // get deal detail url
                     Element link = dealItem.getElementsByAttributeValueContaining("class", "linkPlain").first();
                     String dealUrl = link.attr("href");
@@ -78,9 +73,10 @@ public class ScrapeDealabs
                 d("page n°", pageIndex, "contains", dealItems.size(), "articles");
                 d(s);
             }
-
-        } catch (IOException exc) {
+        } catch (Exception exc) {
             throw exc;
+        } finally {
+            reqHandler.closeBrowser();
         }
     }
 
@@ -91,7 +87,7 @@ public class ScrapeDealabs
 //        d(url.getPath());
         Item item = new Item(url);
 
-        Document doc = Jsoup.connect(urlString).get();
+        Document doc = reqHandler.getHTML(url.toString(), true); // here we need selenium :)
 
         // main deal container
         Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
@@ -134,18 +130,24 @@ public class ScrapeDealabs
                 elt -> elt.getElementsByClass("overflow--wrap-off").first()
         ));
 
-        // price reduction [AttrOpt] TODO
-        /*Element priceReductionContainer = subTitle.getElementsByClass
-                ("flex--inline boxAlign-ai--all-c space--ml-2").first();
-        String priceOriginal = Attribute.STATUS_EMPTY;
-        String pricePercentage = Attribute.STATUS_EMPTY;
-        if (priceReductionContainer != null) {
-            priceOriginal = priceReductionContainer.child(0).text().trim();
-            if (priceReductionContainer.childrenSize() > 1)
-                pricePercentage = priceReductionContainer.child(1).text().trim();
-        }
-        item.addAttribute(AttrOpt.create("prixOriginal", priceOriginal));
-        item.addAttribute(AttrOpt.create("pourcentageRabais", pricePercentage));*/
+        // price without reduction [AttrOpt]
+        item.addAttribute(AttrOpt.create("prixOriginal",
+                subTitle,
+                elt -> elt.child(0).text().trim(),
+                elt -> elt.getElementsByClass("flex--inline boxAlign-ai--all-c space--ml-2").first()
+        ));
+
+        // price percentage off [AttrOpt]
+        item.addAttribute(AttrOpt.create("pourcentageRabais",
+                subTitle,
+                elt -> {
+                    String val = Attribute.STATUS_EMPTY;
+                    if (elt.children().size() > 1) val = elt.child(1).text().trim();
+                    return val;
+                },
+                elt -> elt.getElementsByClass("flex--inline boxAlign-ai--all-c space--ml-2").first()
+        ));
+
 
         // shipping price [AttrOpt]
         item.addAttribute(AttrOpt.create("prixLivraison",
@@ -169,7 +171,6 @@ public class ScrapeDealabs
                 elt -> elt.getElementsByAttributeValueContaining("class", "cept-merchant-name").first()
         ));
 
-        // ***** optimisation starts here *****
         // thread section 4 : footer
         Element threadFooter = threadItem.getElementsByAttributeValueStarting
                 ("class", "threadItem-footerMeta").first();
@@ -187,22 +188,21 @@ public class ScrapeDealabs
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "cept-user-title").first()
         ));
-        // ***** optimisation ends here *****
 
         // border 1 : beginning
-        Element borderBeginning = doc.getElementsByAttributeValueContaining
+        Element borderTemperatureAndStatus = doc.getElementsByAttributeValueContaining
                 ("class", "border--color-borderGrey").first();
 
         // temperature [AttrReq]
         item.addAttribute(AttrReq.create("température",
-                borderBeginning,
+                borderTemperatureAndStatus,
                 elt -> elt.text().trim().split(" ")[0],
                 elt -> elt.getElementsByAttributeValueContaining("class", "vote-box").first()
         ));
 
         // status [AttrOpt]
         item.addAttribute(AttrOpt.create("statut", 
-                borderBeginning,
+                borderTemperatureAndStatus,
                 elt -> {
                     String val = elt.text().trim();
                     if (val.split(" ").length > 1) val = val.split(" ")[1];
@@ -212,13 +212,13 @@ public class ScrapeDealabs
                 elt -> elt.getElementsByAttributeValueContaining("class", "vote-box").first()
         ));
 
-        // border 2 : middle
-        Element borderMiddle = doc.getElementsByAttributeValueContaining
-                ("class", "border--color-borderGrey").get(1);
+        // border 2 : bottom border containing additional infos
+        Element borderBottom = doc.getElementsByAttributeValueContaining
+                ("class", "border border--color-borderGrey bRad--a space--v-1 space--h-2").first();
 
         // shippingFrom [AttrOpt]
         item.addAttribute(AttrOpt.create("livraisonDepuis",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--world").first(),
                 elt -> elt.parent().parent()
@@ -226,7 +226,7 @@ public class ScrapeDealabs
 
         // location [AttrOpt]
         item.addAttribute(AttrOpt.create("localisation",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--location").first(),
                 elt -> elt.parent().parent()
@@ -234,7 +234,7 @@ public class ScrapeDealabs
 
         // posted on [AttrReq]
         item.addAttribute(AttrReq.create("postéLe",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--clock text--color-greyShade").first(),
                 elt -> elt.parent().parent()
@@ -242,7 +242,7 @@ public class ScrapeDealabs
 
         // date start [AttrOpt]
         item.addAttribute(AttrOpt.create("dateDébut",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--clock text--color-green").first(),
                 elt -> elt.parent().parent()
@@ -250,7 +250,7 @@ public class ScrapeDealabs
 
         // date expiration [AttrOpt]
         item.addAttribute(AttrOpt.create("dateFin",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim(),
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--hourglass").first(),
                 elt -> elt.parent().parent()
@@ -258,7 +258,7 @@ public class ScrapeDealabs
 
         // date last modification [AttrOpt]
         item.addAttribute(AttrOpt.create("modification",
-                borderMiddle,
+                borderBottom,
                 elt -> elt.text().trim()/*.replace("\"", "")*/,
                 elt -> elt.getElementsByAttributeValueContaining("class", "icon--pencil").first(),
                 elt -> elt.parent().parent()

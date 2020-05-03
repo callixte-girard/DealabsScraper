@@ -11,7 +11,7 @@ public class Debug {
     public static String d(Object... objs) {
         String out = "";
         for (Object obj : objs) {
-            if (obj.getClass().toString().contains("List")) dList((List<Object>) obj);
+            if (obj.getClass().toString().contains("List")) dL((List<Object>) obj);
 //            else if (obj.getClass().toString().contains("[]")) dList((Object[]) obj);
             else {
                 String objStr = String.valueOf(obj);
@@ -35,10 +35,6 @@ public class Debug {
             d(obj);
             d(l);
         }
-    }
-
-    private static void dList(List list) {
-        for (Object obj : list) { d(obj); } d(l);
     }
 
     private static String concat(char c, int length) {

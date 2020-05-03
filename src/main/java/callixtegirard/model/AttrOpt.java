@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 
 import static callixtegirard.util.Debug.d;
 
+
 public class AttrOpt extends Attribute
 {
 

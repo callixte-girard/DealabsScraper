@@ -1,6 +1,8 @@
 package callixtegirard;
 
 
+import callixtegirard.model.RequestHandler;
+import callixtegirard.util.Debug;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,14 +22,21 @@ public class MainTest
     public static void main(String[] args) throws Exception
     {
         String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
-        Document doc = Jsoup.connect(urlString).get();
+//        Document doc = Jsoup.connect(urlString).get();
+        Document doc = new RequestHandler(true, null).getHTML(urlString, true);
+
+//        Element elt = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(1);
+//        Elements elts = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey");
+//        Elements elts = doc.getElementsByAttributeValueContaining("class", "text--color-greyShade");
+//        Elements elts = doc.getElementsByAttributeValueContaining("class", "border border--color-borderGrey bRad--a space--v-1 space--h-2");
 //        Elements elts = doc.getElementsByClass("pipou");
-        Elements elts = doc.getElementsByClass("userHtml userHtml-content");
-//        Element el = elts.first(); // this doesn't throw a NPexc.
-//        Element el = elts.get(0); // THIS throws en NPexc.
-//        el = el.parent(); // that triggers an NPexc.
-//        d(el); // the NPexc occurs HERE.
-        dL(elts);
+//        Elements elts = doc.getElementsByClass("userHtml userHtml-content");
+//        Element elt = elts.first(); // this doesn't throw a NPexc.
+//        Element elt = elts.get(0); // THIS throws en NPexc.
+//        elt = elt.parent(); // that triggers an NPexc.
+//        d(elt); // the NPexc occurs HERE.
+//        d(Debug.s);
+//        dL(elts);
 
         /*Document docTest = Jsoup.connect("https://www.google.fr").get();
 
