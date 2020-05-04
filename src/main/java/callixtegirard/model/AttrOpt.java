@@ -31,12 +31,12 @@ public class AttrOpt extends Attribute
     }
 
 
-    private static AttrOpt create(String attrName, Object attrValue)
+    public static AttrOpt create(String attrName, Object attrValue)
     {
         return create(attrName, attrValue, Attribute.STATUS_EMPTY);
     }
 
-    private static AttrOpt create(String attrName, Object attrValue, Object attrState)
+    public static AttrOpt create(String attrName, Object attrValue, Object attrState)
     {
         AttrOpt attr = new AttrOpt(attrName, String.valueOf(attrValue), String.valueOf(attrState));
         if (debug) d(attr);

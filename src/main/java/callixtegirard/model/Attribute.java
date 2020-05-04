@@ -41,4 +41,11 @@ public abstract class Attribute //implements MyInterface
         return out;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

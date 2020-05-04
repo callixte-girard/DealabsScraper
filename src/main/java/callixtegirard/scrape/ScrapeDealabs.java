@@ -3,6 +3,7 @@ package callixtegirard.scrape;
 import static callixtegirard.util.Debug.*;
 
 import callixtegirard.model.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -38,7 +39,8 @@ public class ScrapeDealabs
         try {
             int pageIndex = 0;
             boolean finished = false;
-            while (!finished) {
+            while (!finished)
+            {
                 pageIndex++;
 
                 String scheme = "https";
@@ -51,7 +53,7 @@ public class ScrapeDealabs
 //                d(url);
 
                 // includes selenium or jsoup
-                Document doc = reqHandler.getHTML(url.toString(), false); // don't need selenium here
+                Document doc = reqHandler.getDocHTML(url.toString(), false); // don't need selenium here
 
                 Elements dealItems = doc.getElementsByTag("article");
                 for (Element dealItem : dealItems) {
@@ -87,7 +89,7 @@ public class ScrapeDealabs
 //        d(url.getPath());
         Item item = new Item(url);
 
-        Document doc = reqHandler.getHTML(url.toString(), true); // here we need selenium :)
+        Document doc = reqHandler.getDocHTML(url.toString(), true); // here we need selenium :)
 
         // main deal container
         Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
@@ -147,7 +149,6 @@ public class ScrapeDealabs
                 },
                 elt -> elt.getElementsByClass("flex--inline boxAlign-ai--all-c space--ml-2").first()
         ));
-
 
         // shipping price [AttrOpt]
         item.addAttribute(AttrOpt.create("prixLivraison",
@@ -275,18 +276,35 @@ public class ScrapeDealabs
         // v1 : "Voir le deal"
         // v1a : en bas à droite
         // v1b : au milieu
-        // les deux sont gérés en prenant doc comme référence
-        /*String dealRedirectURL;
-        Elements buttonDeal = doc.getElementsByAttributeValueStarting("class", "cept-dealBtn");
-        if (buttonDeal != null) {
-            dealRedirectURL = buttonDeal.first().attr("href");
-        }
         // v2 : voucher code
-        String voucherRedirectURL;
-        Elements buttonVoucher = doc.getElementsByAttributeValueStarting("class", "cept-vcb");
-        if (buttonVoucher != null) {
-            voucherRedirectURL =
-        }*/
+        // on gère les 2 en 1 en récupérant simplement l'élément par le texte
+
+        // thread section 4 : footer
+        Element threadDealButton = threadItem.getElementsByAttributeValueStarting
+                ("class", "threadItem-dealBtn").first();
+
+        // deal real url
+        AttrOpt dealabsRedirectURL = AttrOpt.create("dealRedirectURL",
+                threadDealButton,
+                elt -> elt.attr("href"),
+                elt -> elt.getElementsByTag("a").first()
+        );
+        reqHandler.getBrowser().get(dealabsRedirectURL.getValue());
+        item.addAttribute(AttrOpt.create("dealRealURL", reqHandler.getBrowser().getCurrentUrl()));
+
+        // deal voucher code + url
+        reqHandler.getBrowser().findElementByClassName("cept-vch").click();
+
+        // voucher code
+        item.addAttribute(AttrOpt.create("voucherCode",
+                Jsoup.parse(reqHandler.getBrowser().getPageSource()),
+                elt -> elt.attr("value"),
+                elt -> elt.getElementsByAttributeValueContaining("class", "js-voucherCode").first(),
+                elt -> elt.getElementsByTag("input").first()
+        ));
+        // voucher link
+        reqHandler.getBrowser().findElementByClassName("cept-vch").click();
+        item.addAttribute(AttrOpt.create("voucherRealURL", reqHandler.getBrowser().getCurrentUrl()));
 
         return item;
     }

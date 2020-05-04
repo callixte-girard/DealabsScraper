@@ -31,10 +31,11 @@ public class Item implements Serializable
         return attributes;
     }
 
-    public void addAttribute(Attribute attribute) throws Exception {
+    public Attribute addAttribute(Attribute attribute) throws Exception {
         if (this.attributes.contains(attribute))
             throw new Exception(attribute + " already present in list !");
         else this.attributes.add(attribute);
+        return attribute;
     }
 
 

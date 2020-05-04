@@ -1,17 +1,14 @@
 package callixtegirard;
 
 
+import callixtegirard.model.AttrOpt;
 import callixtegirard.model.RequestHandler;
-import callixtegirard.util.Debug;
+import callixtegirard.scrape.ScrapeDealabs;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import org.junit.runner.Request;
 
 import static callixtegirard.util.Debug.d;
 import static callixtegirard.util.Debug.dL;
@@ -21,10 +18,20 @@ public class MainTest
 {
     public static void main(String[] args) throws Exception
     {
-        String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
+//        String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";
+//        String urlString = "https://www.dealabs.com/codes-promo/livraison-panier-de-fruits-et-legumes-bio-gratuite-1879891";
 //        Document doc = Jsoup.connect(urlString).get();
-        Document doc = new RequestHandler(true, null).getHTML(urlString, true);
+//        Document doc = new RequestHandler(true, null).getDocHTML(urlString, true);
+//        RequestHandler requestHandler = new RequestHandler(true, null);
+//        requestHandler.getBrowser().get(urlString);
+//        requestHandler.getBrowser().findElementByClassName("cept-vch").click();
 
+//        Element threadItem = doc.getElementsByAttributeValueStarting("class", "threadItem").first();
+//        Element threadDealButton = threadItem.getElementsByAttributeValueStarting
+//                ("class", "threadItem-dealBtn").first();
+//        d(threadDealButton);
+
+//        Elements elts = doc.getElementsContainingText("Voir le deal");
 //        Element elt = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey").get(1);
 //        Elements elts = doc.getElementsByAttributeValueContaining("class", "border--color-borderGrey");
 //        Elements elts = doc.getElementsByAttributeValueContaining("class", "text--color-greyShade");

@@ -29,12 +29,12 @@ public class AttrReq extends Attribute //implements ExtractAttrContainer, Extrac
     }
 
 
-    private static AttrReq create(String attrName, Object attrValue)
+    public static AttrReq create(String attrName, Object attrValue)
     {
         return create(attrName, attrValue, Attribute.STATUS_EMPTY);
     }
 
-    private static AttrReq create(String attrName, Object attrValue, Object attrState)
+    public static AttrReq create(String attrName, Object attrValue, Object attrState)
     {
         AttrReq attr = new AttrReq(attrName, String.valueOf(attrValue), String.valueOf(attrState));
         if (debug) d(attr);

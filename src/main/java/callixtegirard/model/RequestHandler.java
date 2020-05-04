@@ -25,7 +25,7 @@ public class RequestHandler
     }
 
 
-    public Document getHTML(String url, boolean webDriver) throws IOException, InterruptedException
+    public Document getDocHTML(String url, boolean webDriver) throws IOException, InterruptedException
     {
         Document doc;
         if (!webDriver) {
@@ -45,5 +45,10 @@ public class RequestHandler
     {
         if (browser != null) browser.quit();
         else throw new WebDriverException("!!! WebDriver is empty ; could not be closed !!!");
+    }
+
+
+    public static ChromeDriver getBrowser() {
+        return browser;
     }
 }
