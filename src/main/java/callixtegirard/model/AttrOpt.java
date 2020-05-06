@@ -9,9 +9,9 @@ public class AttrOpt extends Attribute
 {
 
     private AttrOpt(String name, String value, String status) {
-        this.name = name;
-        this.value = value;
-        this.status = status;
+        this.name = name.replaceAll(";", ",");
+        this.value = value.replaceAll(";", ",");
+        this.status = status.replaceAll(";", ",");
     }
 
 

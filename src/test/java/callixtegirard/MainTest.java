@@ -16,6 +16,9 @@ import static callixtegirard.util.Debug.dL;
 
 public class MainTest
 {
+    private static final RequestHandler reqHandler = new RequestHandler(true,false,null);
+
+
     public static void main(String[] args) throws Exception
     {
 //        String urlString = "https://www.dealabs.com/bons-plans/paire-de-manettes-under-control-iicon-sans-fil-pour-nintendo-switch-gris-1881866";

@@ -13,7 +13,8 @@ public abstract class Attribute //implements MyInterface
     /*public enum Status {
         AVAILABLE,
     }*/
-    public static final String STATUS_EMPTY = "(unavailable)";
+//    public static final String STATUS_EMPTY = "";
+    public static final String STATUS_EMPTY = "(vide)";
 
     protected String name;
     protected String value;

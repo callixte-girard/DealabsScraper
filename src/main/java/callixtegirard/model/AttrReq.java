@@ -5,13 +5,13 @@ import org.jsoup.nodes.Element;
 import static callixtegirard.util.Debug.d;
 
 
-public class AttrReq extends Attribute //implements ExtractAttrContainer, ExtractAttrValue
+public class AttrReq extends Attribute
 {
 
     private AttrReq(String name, String value, String status) {
-        this.name = name;
-        this.value = value;
-        this.status = status;
+        this.name = name.replaceAll(";", ",");
+        this.value = value.replaceAll(";", ",");
+        this.status = status.replaceAll(";", ",");
     }
 
 
@@ -40,15 +40,4 @@ public class AttrReq extends Attribute //implements ExtractAttrContainer, Extrac
         if (debug) d(attr);
         return attr;
     }
-
-/*
-    @Override
-    public Container extractAttrContainer(Container upperLevelContainer) {
-        return null;
-    }
-
-    @Override
-    public String extractAttrValue(Container attributeContainer) {
-        return null;
-    }*/
 }

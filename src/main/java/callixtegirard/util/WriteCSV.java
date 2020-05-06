@@ -1,8 +1,12 @@
 package callixtegirard.util;
 
+import callixtegirard.model.Attribute;
+import callixtegirard.model.Item;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import static callixtegirard.util.Debug.d;
@@ -10,8 +14,20 @@ import static callixtegirard.util.Debug.d;
 
 public class WriteCSV
 {
+    private static final String NO_DATA = "-";
 
-    private static final String NO_DATA = "—";
+
+    /*public static void pipo(String path, List toWrite, FormatAttribute formatAttributes)
+    {
+        BufferedWriter bw = ReadWriteFile.outputWriter(path);
+        List<String> lineAttributesToWrite = new ArrayList<>();
+        for (Object obj : toWrite) {
+
+            WriteCSV.writeLine(bw, lineAttributesToWrite, "|", true);
+        }
+        // don't forget to close this little motherfucker !
+        bw.close();
+    }*/
 
 
     public static void exportFields

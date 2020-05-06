@@ -52,9 +52,9 @@ public class ReadWriteFile
 
         BufferedWriter bw = new BufferedWriter
                 // 1) writes file in... some format (probably ANSI).
-//                (new FileWriter(f));
+                (new FileWriter(f));
                 // 2) writes file in UTF-8 format
-                (new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8));
+//                (new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8));
         return bw;
     }
 
@@ -72,6 +72,12 @@ public class ReadWriteFile
 
 
     // READ FOLDERS AND FILES CONTENT
+    public static void createFolderIfNotExists(String path) throws IOException
+    {
+        File f = new File(path);
+        if (!f.exists()) f.mkdir();
+    }
+
     public static ArrayList<File> getFilesInFolder(String full_path)
     {
         File folder = new File(full_path);

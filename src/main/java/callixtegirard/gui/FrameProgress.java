@@ -7,10 +7,10 @@ import java.awt.*;
 
 public class FrameProgress extends JFrame
 {
-    private static final int paddingSize = 15;
+    protected static final int paddingSize = 15;
 
-    private JLabel label = new JLabel();
-    private JProgressBar bar = new JProgressBar();
+    protected JLabel label = new JLabel();
+    protected JProgressBar bar = new JProgressBar();
 
 
     public FrameProgress(String title)
@@ -49,6 +49,10 @@ public class FrameProgress extends JFrame
             this.label.setText(msg);
             this.bar.setValue(progress);
         });
+    }
+
+    public void update(String msg) {
+        SwingUtilities.invokeLater(() -> this.label.setText(msg));
     }
 
 

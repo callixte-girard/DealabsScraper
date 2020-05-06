@@ -2,8 +2,10 @@ package callixtegirard.model;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -17,10 +19,14 @@ public class RequestHandler
     private static final boolean debugWait = false;
 
 
-    public RequestHandler(boolean webDriver, Integer pageSizeLimit)
+    public RequestHandler(boolean webDriver, boolean headless, Integer pageSizeLimit)
     {
-        if (browser != null) throw new WebDriverException("!!! Driver already instanciated !!!");
-        if (webDriver) browser = new ChromeDriver();
+        if (browser != null) throw new AssertionError("!!! Driver already instanciated !!!");
+        if (webDriver) {
+            ChromeOptions options = new ChromeOptions();
+            options.setHeadless(headless);
+            browser = new ChromeDriver(options);
+        }
         if (pageSizeLimit != null) maxBodySize = pageSizeLimit;
     }
 
@@ -44,11 +50,11 @@ public class RequestHandler
     public void closeBrowser()
     {
         if (browser != null) browser.quit();
-        else throw new WebDriverException("!!! WebDriver is empty ; could not be closed !!!");
+        else throw new AssertionError("!!! WebDriver is empty ; could not be closed !!!");
     }
 
 
-    public static ChromeDriver getBrowser() {
+    public ChromeDriver getBrowser() {
         return browser;
     }
 }

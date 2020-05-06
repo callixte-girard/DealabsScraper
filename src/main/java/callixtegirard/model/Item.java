@@ -38,5 +38,12 @@ public class Item implements Serializable
         return attribute;
     }
 
-
+    public Attribute getAttributeByName(String attrNameToGet) {
+        for (Attribute attr : this.getAttributes()) {
+            if (attr.getName().equals(attrNameToGet)) {
+                return attr;
+            }
+        }
+        throw new AssertionError("!!! Attribute [ " + attrNameToGet + " ] does not exist.");
+    }
 }
