@@ -1,0 +1,23 @@
+# ignoring IDE-specific files (must import if just opening doesn't work in IntelliJ)
+.idea
+.vscode
+*.iml
+.dist
+# private and voluminous files
+data_*
+# test files (can be voluminous)
+#test
+# macOS-specific
+.DS_Store
+# maven specific
+target
+# python-specific
+**__pycache__*
+venv
+# node-specific
+node_modules
+# java-specific
+out
+# selenium-specific
+**/chromedriver**
+**/chrome_options**
