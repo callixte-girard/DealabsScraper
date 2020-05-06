@@ -8,6 +8,8 @@ public class Main
 {
     /*
     TODO :
+    - changer la nomenclature de nommage des images
+    - vérifier que l'encodage est bon sous Windaub
     V sauvegarder les images une à une
     V implémenter l'arrêt une fois les dernières 24h dépassées
     V refaire la récup de la date flamme
@@ -22,17 +24,12 @@ public class Main
     O remove quotes in last edition
      */
 
-    // THEY ARE ALL STATIC !!!!!
-
-    // ui
-
     // debug
     private static final boolean debugExtractInfo = false;
     ///////
 
 
-    public static void main(String[] args)
-    {
-        new DealabsScraper();
+    public static void main(String[] args) throws Exception {
+        new DealabsScraper().scrapeEverything();
     }
 }

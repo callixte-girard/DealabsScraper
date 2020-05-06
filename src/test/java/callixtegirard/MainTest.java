@@ -3,7 +3,6 @@ package callixtegirard;
 
 import callixtegirard.model.AttrOpt;
 import callixtegirard.model.RequestHandler;
-import callixtegirard.scrape.ScrapeDealabs;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

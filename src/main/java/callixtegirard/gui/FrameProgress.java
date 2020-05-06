@@ -42,6 +42,35 @@ public class FrameProgress extends JFrame
         this.setVisible(true);
     }
 
+    public FrameProgress(String title, int width, int height, int rows, int cols)
+    {
+        this.setTitle(title);
+        this.setSize(width, height);
+        this.setLocationRelativeTo(null); //Nous demandons maintenant à notre objet de se positionner au centre
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Termine le processus lorsqu'on clique sur la croix rouge
+        this.setResizable(true);
+        this.setLayout(new GridLayout(rows, cols));
+
+        this.label.setText("Initialisation...");
+        this.label.setBorder(new EmptyBorder(0, paddingSize, 0, paddingSize));
+        this.add(label);
+
+//        this.bar.setMaximum(total);
+        this.bar.setBorder(new EmptyBorder(0, paddingSize, 0, paddingSize));
+        this.add(bar);
+
+        // autres méthodes utiles
+        // - JFrame
+//        this.setGlassPane(); // ajoute une couche pour intercepter les actions de l'utilisateur
+//        this.setLocation(int x, int y);
+//        this.setAlwaysOnTop(boolean b);
+//        this.setUndecorated(boolean b); // retire les bordes et boutons de contrôle
+        // - JLabel
+//        this.setBounds(int x, int y, int width, int height); // ????
+
+        this.setVisible(true);
+    }
+
 
     public void update(String msg, int progress)
     {

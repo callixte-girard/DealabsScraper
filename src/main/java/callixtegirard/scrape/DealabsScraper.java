@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +35,14 @@ public class DealabsScraper extends WebsiteScraper
     private final String folderOutput = "exports/";
     private final String folderOutputImages = folderOutput + "images_" + dateNow + "/";
     private final String pathOutputCSV = folderOutput + filenameOutputCSV;
+    // encoding
+//    private final Charset customEncoding = StandardCharsets.ISO_8859_1;
+//    private final Charset customEncoding = StandardCharsets.UTF_8;
 
     // attribute names
     private final String attrName_stopScraping = "dateFlamme";
     private final String attrName_imageURL = "imageURL";
+    private final String attrName_imageFilename = "imageNomFichier";
     private final String attrName_title = "titre";
 
     // ui specific to THIS scraper
@@ -48,7 +54,7 @@ public class DealabsScraper extends WebsiteScraper
 //    }
 
 
-    protected void scrapeEverything() throws Exception//, IOException, URISyntaxException,
+    public void scrapeEverything() throws Exception//, IOException, URISyntaxException,
     {
         frameProgress.getBar().setMaximum(60); // minutes
         frameProgress.getBar2().setMaximum(24); // heures
@@ -113,15 +119,19 @@ public class DealabsScraper extends WebsiteScraper
                             elt -> elt.getElementsByAttributeValueContaining("class", "cept-description-container").first()
                     ));
 
+                    // generate image filename
+                    String imageFilename = /*deal.getAttributeByName(attrName_title).getValue() + */
+                            "promo_" + dateNow + "_" + itemIndex + ".jpg";
+                    // register it as an attribute
+                    deal.addAttribute(AttrReq.create(attrName_imageFilename, imageFilename));
+
                     scrapedItems.add(deal);
 //                    d(deal);
                     d(l);
 
                     // save image
-                    String imageFilename = /*deal.getAttributeByName(attrName_title).getValue() + */
-                            "promo_" + dateNow + "_" + itemIndex;
                     try {
-                        String pathOutputImage = folderOutputImages + imageFilename + ".jpg";
+                        String pathOutputImage = folderOutputImages + imageFilename;
                         ReadWriteFile.createFolderIfNotExists(folderOutputImages);
                         ReadWriteFile.writeFileFromURL(
                                 deal.getAttributeByName(attrName_imageURL).getValue(),
@@ -135,7 +145,7 @@ public class DealabsScraper extends WebsiteScraper
 
                     // update ui accordingly
                     try {
-                        frameProgress.update("Récupération de la page n°" + pageIndex
+                        frameProgress.updateTextAndBars("Récupération de la page n°" + pageIndex
                                         + " — deal n°" + itemIndex
                                         + " — " + deal.getAttributeByName(attrName_stopScraping).getValue()
                                 , extractMinutes(deal.getAttributeByName(attrName_stopScraping).getValue())
@@ -155,8 +165,11 @@ public class DealabsScraper extends WebsiteScraper
                     ) { // more than 24h
                         finished = true;
                         // update the ui
-                        frameProgress.update("Exportation du CSV dans [ " + pathOutputCSV + " ] en cours...",
-                                60, 24);
+                        frameProgress.updateTextAndBars("Exportation du CSV dans [ " + pathOutputCSV + " ] en cours...",
+                                frameProgress.getBar().getValue(),
+                                frameProgress.getBar2().getValue()
+                        );
+                        frameProgress.updateButton("Fini!");
                         break; // leave the for loop
                     }
                 }
@@ -174,12 +187,16 @@ public class DealabsScraper extends WebsiteScraper
             try {
                 // write results as csv
                 writeExportCSV(scrapedItems);
-                frameProgress.update("Exportation du CSV dans [ " + pathOutputCSV + " ] terminée!",
-                        60, 24);
+                frameProgress.updateTextAndBars("Exportation du CSV dans [ " + pathOutputCSV + " ] terminée!",
+                        frameProgress.getBar().getValue(),
+                        frameProgress.getBar2().getValue()
+                );
 
             } catch (IOException ioException) {
-                frameProgress.update("Erreur lors de l'exportation du CSV dans [ " + pathOutputCSV + " ].",
-                        60, 24);
+                frameProgress.updateTextAndBars("Erreur lors de l'exportation du CSV dans [ " + pathOutputCSV + " ].",
+                        frameProgress.getBar().getValue(),
+                        frameProgress.getBar2().getValue()
+                );
             }
 
         }
@@ -201,7 +218,7 @@ public class DealabsScraper extends WebsiteScraper
         Element threadImage = doc.getElementsByAttributeValueStarting
                 ("class", "threadItem-image").first();
 
-        // image [AttrReq]
+        // imageURL [AttrReq]
         item.addAttribute(AttrReq.create(attrName_imageURL,
                 threadImage,
                 elt -> elt.attr("src"),
@@ -440,6 +457,24 @@ public class DealabsScraper extends WebsiteScraper
     }
 
 
+    // when button clicked
+    @Override
+    protected void stopAtNextTurn(boolean stop)
+    {
+        if (! this.shouldWeStopAtNextTurn)
+        { // only if it has not been clicked yet
+            this.frameProgress.updateButton(false);
+            this.frameProgress.updateTextAndBars("Arrêt en cours...",
+                    this.frameProgress.getBar().getValue(),
+                    this.frameProgress.getBar2().getValue()
+            );
+//            this.frameProgress.remove(this.frameProgress.getButtonStop());
+        }
+        // then put the value
+        this.shouldWeStopAtNextTurn = stop;
+    }
+
+
     // sub methods
     private ArrayList<Integer> extractNumbersFromString(String str)
     {
@@ -471,30 +506,25 @@ public class DealabsScraper extends WebsiteScraper
     }
 
 
-    // when button clicked
-    @Override
-    public void stopAtNextTurn(boolean stop) {
-        shouldWeStopAtNextTurn = stop;
-    }
-
-
     // export
     protected void writeExportCSV(List<Item> deals) throws IOException
-    { // TODO to make a higher-level method for writing CSV from custom Object[]
+    {
+//        BufferedWriter bw = ReadWriteFile.outputWriter(pathOutputCSV, customEncoding);
         BufferedWriter bw = ReadWriteFile.outputWriter(pathOutputCSV);
         // headers
         List<String> headersToWrite = new ArrayList<>();
         for (Attribute attr : deals.get(0).getAttributes()) {
             headersToWrite.add(attr.getName());
         }
-        WriteCSV.writeLine(bw, headersToWrite, valuesSeparator, true);
+        WriteCSV.writeLine(bw, headersToWrite, valuesSeparator, false);
         // attributes
         for (Item deal : deals) {
             List<String> dataToWrite = new ArrayList<>();
             for (Attribute attr : deal.getAttributes()) {
                 dataToWrite.add(attr.getValue());
             }
-            WriteCSV.writeLine(bw, dataToWrite, valuesSeparator, true);
+            // write all attributes on one line
+            WriteCSV.writeLine(bw, dataToWrite, valuesSeparator, false);
         }
         // don't forget to close this little motherfucker !
         bw.close();

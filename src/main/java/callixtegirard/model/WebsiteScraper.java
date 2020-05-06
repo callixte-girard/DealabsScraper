@@ -13,11 +13,11 @@ public abstract class WebsiteScraper
 
     protected boolean shouldWeStopAtNextTurn = false;
 
-    public void stopAtNextTurn(boolean stop) {
+    protected void stopAtNextTurn(boolean stop) {
         this.shouldWeStopAtNextTurn = stop;
     }
 
-    protected abstract void scrapeEverything() throws Exception;
+    public abstract void scrapeEverything() throws Exception;
     protected abstract Item scrapeItem(String itemUrl) throws Exception;
     protected abstract void writeExportCSV(List<Item> dataToWrite) throws IOException;
 }

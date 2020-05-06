@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -50,24 +51,37 @@ public class ReadWriteFile
         File f = new File(path);
         if (!f.exists()) f.createNewFile();
 
-        BufferedWriter bw = new BufferedWriter
-                // 1) writes file in... some format (probably ANSI).
-                (new FileWriter(f));
-                // 2) writes file in UTF-8 format
-//                (new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8));
-        return bw;
+        return new BufferedWriter(new FileWriter(f));
+    }
+
+    public static BufferedWriter outputWriter(String path, Charset encoding) throws IOException
+    {
+        // creates file if it doesn't exist yet
+        File f = new File(path);
+        if (!f.exists()) f.createNewFile();
+
+        // encodings
+//        StandardCharsets.UTF_8;
+//        StandardCharsets.ISO_8859_1;
+
+        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), encoding));
     }
 
     public static BufferedReader outputReader(String path) throws FileNotFoundException
     {
-//        File f = new File(path);
+        File f = new File(path);
+        return new BufferedReader(new FileReader(f));
+    }
 
-        BufferedReader br = new BufferedReader
-                // 1) reads file in... some format (probably ANSI).
-//                (new FileReader(f));
-                // 2) reads file in UTF-8 format
-                (new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8));
-        return br ;
+    public static BufferedReader outputReader(String path, Charset encoding) throws FileNotFoundException
+    {
+        File f = new File(path);
+
+        // encodings
+//        StandardCharsets.UTF_8;
+//        StandardCharsets.ISO_8859_1;
+
+        return new BufferedReader(new InputStreamReader(new FileInputStream(path), encoding));
     }
 
 
